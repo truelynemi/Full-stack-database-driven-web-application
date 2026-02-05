@@ -29,6 +29,10 @@
     <label for="signupConfirmPassword">Confirm password</label>
     {{ form.confirm_password() }} <!-- Flask-WTF handles rendering the field -->
 
+    <label for="agree_terms">
+        {{ form.agree_terms() }} I agree to the Terms & Conditions <!-- Flask-WTF handles rendering the field -->
+    </label>
+
     <button type="submit" class="btn btn-primary auth-btn">
         Sign up
     </button>

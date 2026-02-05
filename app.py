@@ -21,6 +21,7 @@ class NameForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])  # Email validation
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password', message='Passwords must match')])
+    agree_terms = BooleanField('I agree to the Terms & Conditions', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
 # -------------------------------------------------
@@ -111,6 +112,10 @@ def register():
             existing_user = User.query.filter_by(email=email).first()
             if existing_user:
                 error = "An account with that email already exists."
+
+        # **Terms and Conditions Validation**: Ensure the user agrees to the terms
+        if not form.agree_terms.data:
+            error = "You must agree to the Terms and Conditions."
 
         # 3. If no errors, create the user
         if not error:
