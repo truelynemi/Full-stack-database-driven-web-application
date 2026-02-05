@@ -4,3 +4,6 @@
 - Password Hashing
 - Enhanced Password Validation
 - Server-Side Form Validation
+- Terms and Conditions
+- Rate Limiting
+- Client-Size Validation
