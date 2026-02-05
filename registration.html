@@ -43,5 +43,34 @@
     </p>
 </form>
 
+<!-- JavaScript for password validation -->
+<script>
+    document.getElementById('registerForm').addEventListener('submit', function(e) {
+        let password = document.getElementById('password').value;
+        let confirmPassword = document.getElementById('confirm_password').value;
+        let passwordError = '';
+        
+        // Check if password meets criteria
+        if (password.length < 8) {
+            passwordError = 'Password must be at least 8 characters long.';
+        } else if (!/\d/.test(password)) {
+            passwordError = 'Password must contain at least one number.';
+        } else if (!/[A-Z]/.test(password)) {
+            passwordError = 'Password must contain at least one uppercase letter.';
+        }
+
+        // Check if passwords match
+        if (password !== confirmPassword) {
+            passwordError = 'Passwords do not match.';
+        }
+
+        // If there's an error, prevent form submission and show the error message
+        if (passwordError) {
+            e.preventDefault();  // Prevent form submission
+            alert(passwordError);  // Show the error
+        }
+    });
+</script>
+
 </body>
 </html>
