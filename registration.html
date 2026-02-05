@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form id="signupForm" method="post">
+    {{ form.hidden_tag() }}  <!-- CSRF Token -->
+
+    <div class="grid-2">
+        <div>
+            <label for="firstName">First name</label>
+            {{ form.first_name() }} <!-- Flask-WTF handles rendering the field -->
+        </div>
+        <div>
+            <label for="lastName">Last name</label>
+            {{ form.last_name() }} <!-- Flask-WTF handles rendering the field -->
+        </div>
+    </div>
+
+    <label for="signupEmail">Email address</label>
+    {{ form.email() }} <!-- Flask-WTF handles rendering the field -->
+
+    <label for="signupPassword">Password</label>
+    {{ form.password() }} <!-- Flask-WTF handles rendering the field -->
+
+    <label for="signupConfirmPassword">Confirm password</label>
+    {{ form.confirm_password() }} <!-- Flask-WTF handles rendering the field -->
+
+    <button type="submit" class="btn btn-primary auth-btn">
+        Sign up
+    </button>
+
+    <p class="auth-meta">
+        Already have an account? 
+        <a href="{{ url_for('login') }}">Log in</a>
+    </p>
+</form>
+
+</body>
+</html>
