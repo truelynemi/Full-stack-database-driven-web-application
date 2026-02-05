@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_wtf.csrf import CSRFProtect, CSRFError, FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, EqualTo, Email
+from flask_limiter import Limiter
 import re
 
 # Import the shared db object and the User model from models.py
@@ -14,6 +15,9 @@ from models import db, User
 app = Flask(__name__)
 csrf = CSRFProtect(app)  # Enable CSRF protection globally
 
+# Set up rate limiter: limit to 5 requests per minute per IP address for certain routes
+limiter = Limiter(app, key_func=get_remote_address)
+
 # Creating a FlaskForm to manage CSRF properly
 class NameForm(FlaskForm):
     first_name = StringField('First Name', validators=[DataRequired()])
@@ -24,9 +28,16 @@ class NameForm(FlaskForm):
     agree_terms = BooleanField('I agree to the Terms & Conditions', validators=[DataRequired()])
     submit = SubmitField('Submit')
 
+@app.route('/about')
+@limiter.exempt  # This route is exempt from rate limiting
+def about():
+    return render_template('about.html')
+
 # -------------------------------------------------
 # LOGIN ROUTE
 # -------------------------------------------------
+@app.route('/login', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Limit this route to 5 requests per minute
 def login():
     error = None  # This will hold any error message to display in the template
     form = NameForm()
@@ -75,6 +86,7 @@ def login():
 # REGISTRATION ROUTE
 # -------------------------------------------------
 @app.route('/register', methods=['GET', 'POST'])
+@limiter.limit("5 per minute")  # Limit this route to 5 requests per minute
 def register():
     error = None  # This will hold any validation error message
     form = NameForm()
