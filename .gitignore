@@ -1,0 +1,19 @@
+# Environment variables — NEVER commit this
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# SQLite database
+*.db
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# IDE
+.vscode/
+.idea/

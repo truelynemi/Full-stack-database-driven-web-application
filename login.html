@@ -7,7 +7,7 @@
 </head>
 <body>
 
-    <!-- Flash messages (e.g. success after registration, CSRF errors) -->
+    <!-- Flash messages -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -19,16 +19,19 @@
     <form id="loginForm" method="post">
     {{ form.hidden_tag() }}  <!-- CSRF Token -->
 
-    <!-- Inline server-side error message -->
+    <!-- Inline server-side error -->
     {% if error %}
         <p class="error">{{ error }}</p>
+        {% if 'verify' in error %}
+            <p><a href="{{ url_for('resend_verification') }}">Resend verification email</a></p>
+        {% endif %}
     {% endif %}
 
     <label for="loginEmail">Email address</label>
-    {{ form.email() }} <!-- Flask-WTF handles rendering the field -->
+    {{ form.email() }}
 
     <label for="loginPassword">Password</label>
-    {{ form.password() }} <!-- Flask-WTF handles rendering the field -->
+    {{ form.password() }}
 
     <label for="remember_me">
         {{ form.remember_me() }} Remember me
@@ -37,6 +40,13 @@
     <button type="submit" class="btn btn-primary auth-btn">
         Sign in
     </button>
+
+    <p><a href="{{ url_for('forgot_password') }}">Forgot your password?</a></p>
+
+    <hr>
+
+    <a href="{{ url_for('google.login') }}" class="btn btn-google">Sign in with Google</a>
+    <a href="{{ url_for('twitter.login') }}" class="btn btn-twitter">Sign in with Twitter</a>
 
     <p class="auth-meta">
         Don't have an account?
