@@ -3,11 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sign Up</title>
 </head>
 <body>
+
+    <!-- Flash messages (e.g. CSRF errors) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash flash-{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <form id="signupForm" method="post">
     {{ form.hidden_tag() }}  <!-- CSRF Token -->
+
+    <!-- Inline server-side error message -->
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
 
     <div class="grid-2">
         <div>
@@ -38,18 +53,18 @@
     </button>
 
     <p class="auth-meta">
-        Already have an account? 
+        Already have an account?
         <a href="{{ url_for('login') }}">Log in</a>
     </p>
 </form>
 
-<!-- JavaScript for password validation -->
+<!-- JavaScript for client-side password validation -->
 <script>
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
         let password = document.getElementById('password').value;
         let confirmPassword = document.getElementById('confirm_password').value;
         let passwordError = '';
-        
+
         // Check if password meets criteria
         if (password.length < 8) {
             passwordError = 'Password must be at least 8 characters long.';
