@@ -3,12 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Sign In</title>
 </head>
 <body>
-    
+
+    <!-- Flash messages (e.g. success after registration, CSRF errors) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash flash-{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
     <form id="loginForm" method="post">
     {{ form.hidden_tag() }}  <!-- CSRF Token -->
+
+    <!-- Inline server-side error message -->
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
 
     <label for="loginEmail">Email address</label>
     {{ form.email() }} <!-- Flask-WTF handles rendering the field -->
@@ -16,16 +30,19 @@
     <label for="loginPassword">Password</label>
     {{ form.password() }} <!-- Flask-WTF handles rendering the field -->
 
+    <label for="remember_me">
+        {{ form.remember_me() }} Remember me
+    </label>
+
     <button type="submit" class="btn btn-primary auth-btn">
         Sign in
     </button>
 
     <p class="auth-meta">
-        Don’t have an account? 
+        Don't have an account?
         <a href="{{ url_for('register') }}">Sign up</a>
     </p>
 </form>
-
 
 </body>
 </html>
