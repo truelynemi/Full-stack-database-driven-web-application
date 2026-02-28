@@ -7,3 +7,6 @@
 - Terms and Conditions
 - Rate Limiting
 - Client-Size Validation
+- Logout route
+- Email Verification
+- Forgot Password / Recovery
