@@ -4,3 +4,5 @@ WTForms[email]
 Flask-SQLAlchemy
 Flask-Limiter
 Werkzeug
+Flask-Mail
+itsdangerous
