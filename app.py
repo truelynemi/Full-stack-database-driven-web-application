@@ -34,7 +34,7 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('GMAIL_ADDRESS')
 # Initialise extensions
 db.init_app(app)
 csrf = CSRFProtect(app)
-limiter = Limiter(app, key_func=get_remote_address)
+limiter = Limiter(get_remote_address, app=app)
 mail = Mail(app)
 
 # -------------------------------------------------
