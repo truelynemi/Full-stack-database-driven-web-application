@@ -7,7 +7,7 @@
 </head>
 <body>
 
-    <!-- Flash messages -->
+    <!-- Flash messages — shown after redirects (e.g. "Account created!", CSRF errors) -->
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -17,13 +17,14 @@
     {% endwith %}
 
     <form id="loginForm" method="post">
-    {{ form.hidden_tag() }}  <!-- CSRF Token -->
+    {{ form.hidden_tag() }}  <!-- CSRF Token — hidden field Flask-WTF checks on submit -->
 
-    <!-- Inline server-side error -->
+    <!-- Inline error from the server (e.g. wrong password, unverified email) -->
     {% if error %}
         <p class="error">{{ error }}</p>
+        <!-- If the error mentions verification, show a quick resend link -->
         {% if 'verify' in error %}
-            <p><a href="{{ url_for('resend_verification') }}">Resend verification email</a></p>
+            <p><a href="{{ url_for('auth.resend_verification') }}">Resend verification email</a></p>
         {% endif %}
     {% endif %}
 
@@ -41,11 +42,11 @@
         Sign in
     </button>
 
-    <p><a href="{{ url_for('forgot_password') }}">Forgot your password?</a></p>
+    <p><a href="{{ url_for('auth.forgot_password') }}">Forgot your password?</a></p>
 
     <p class="auth-meta">
         Don't have an account?
-        <a href="{{ url_for('register') }}">Sign up</a>
+        <a href="{{ url_for('auth.register') }}">Sign up</a>
     </p>
 </form>
 
