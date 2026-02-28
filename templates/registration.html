@@ -19,7 +19,7 @@
     <form id="signupForm" method="post">
     {{ form.hidden_tag() }}  <!-- CSRF Token -->
 
-    <!-- Inline server-side error message -->
+    <!-- Inline server-side error (e.g. email already taken, weak password) -->
     {% if error %}
         <p class="error">{{ error }}</p>
     {% endif %}
@@ -27,25 +27,25 @@
     <div class="grid-2">
         <div>
             <label for="firstName">First name</label>
-            {{ form.first_name() }} <!-- Flask-WTF handles rendering the field -->
+            {{ form.first_name() }}
         </div>
         <div>
             <label for="lastName">Last name</label>
-            {{ form.last_name() }} <!-- Flask-WTF handles rendering the field -->
+            {{ form.last_name() }}
         </div>
     </div>
 
     <label for="signupEmail">Email address</label>
-    {{ form.email() }} <!-- Flask-WTF handles rendering the field -->
+    {{ form.email() }}
 
     <label for="signupPassword">Password</label>
-    {{ form.password() }} <!-- Flask-WTF handles rendering the field -->
+    {{ form.password() }}
 
     <label for="signupConfirmPassword">Confirm password</label>
-    {{ form.confirm_password() }} <!-- Flask-WTF handles rendering the field -->
+    {{ form.confirm_password() }}
 
     <label for="agree_terms">
-        {{ form.agree_terms() }} I agree to the Terms & Conditions <!-- Flask-WTF handles rendering the field -->
+        {{ form.agree_terms() }} I agree to the Terms &amp; Conditions
     </label>
 
     <button type="submit" class="btn btn-primary auth-btn">
@@ -54,18 +54,19 @@
 
     <p class="auth-meta">
         Already have an account?
-        <a href="{{ url_for('login') }}">Log in</a>
+        <a href="{{ url_for('auth.login') }}">Log in</a>
     </p>
 </form>
 
-<!-- JavaScript for client-side password validation -->
+<!-- Client-side password validation — runs before the form is even submitted -->
 <script>
     document.getElementById('signupForm').addEventListener('submit', function(e) {
+        // Get the values of the two password fields
         let password = document.getElementById('password').value;
         let confirmPassword = document.getElementById('confirm_password').value;
         let passwordError = '';
 
-        // Check if password meets criteria
+        // Check password strength (mirrors the server-side rules in auth.py)
         if (password.length < 8) {
             passwordError = 'Password must be at least 8 characters long.';
         } else if (!/\d/.test(password)) {
@@ -74,15 +75,15 @@
             passwordError = 'Password must contain at least one uppercase letter.';
         }
 
-        // Check if passwords match
+        // Check that the two password fields match
         if (password !== confirmPassword) {
             passwordError = 'Passwords do not match.';
         }
 
-        // If there's an error, prevent form submission and show the error message
+        // If there's an error, stop the form from submitting and alert the user
         if (passwordError) {
-            e.preventDefault();  // Prevent form submission
-            alert(passwordError);  // Show the error
+            e.preventDefault();  // Cancel the form submission
+            alert(passwordError);
         }
     });
 </script>

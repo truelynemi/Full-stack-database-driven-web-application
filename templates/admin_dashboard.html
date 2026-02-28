@@ -19,7 +19,7 @@
     <h1>Admin Dashboard</h1>
     <p>Welcome, {{ session['user_name'] }}. You have admin access.</p>
 
-    <a href="{{ url_for('logout') }}">Log out</a>
+    <a href="{{ url_for('auth.logout') }}">Log out</a>
 
 </body>
 </html>

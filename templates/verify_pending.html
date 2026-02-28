@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password</title>
+    <title>Check Your Email</title>
 </head>
 <body>
 
@@ -16,19 +16,15 @@
         {% endif %}
     {% endwith %}
 
-    <h1>Forgot your password?</h1>
-    <p>Enter your email address and we'll send you a link to reset your password.</p>
+    <h1>Check your inbox!</h1>
+    <p>We've sent a verification link to your email address. Click the link in the email to activate your account.</p>
+    <p>The link expires in <strong>1 hour</strong>.</p>
 
-    <form method="post">
-    {{ form.hidden_tag() }}
+    <p>Didn't receive it? Check your spam folder or
+        <a href="{{ url_for('auth.resend_verification') }}">resend the verification email</a>.
+    </p>
 
-    <label for="email">Email address</label>
-    {{ form.email() }}
-
-    <button type="submit">Send Reset Link</button>
-    </form>
-
-    <a href="{{ url_for('login') }}">Back to login</a>
+    <a href="{{ url_for('auth.login') }}">Back to login</a>
 
 </body>
 </html>
