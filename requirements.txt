@@ -6,4 +6,3 @@ Flask-Limiter
 Werkzeug
 Flask-Mail
 itsdangerous
-Flask-Dance[google,twitter]

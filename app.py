@@ -11,8 +11,6 @@ from flask_limiter.util import get_remote_address
 from flask_wtf import FlaskForm
 from flask_mail import Mail, Message
 from itsdangerous import URLSafeTimedSerializer, SignatureExpired, BadSignature
-from flask_dance.contrib.google import make_google_blueprint, google
-from flask_dance.contrib.twitter import make_twitter_blueprint, twitter
 import re
 
 from models import db, User
@@ -33,37 +31,11 @@ app.config['MAIL_USERNAME'] = os.environ.get('GMAIL_ADDRESS')
 app.config['MAIL_PASSWORD'] = os.environ.get('GMAIL_APP_PASSWORD')
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('GMAIL_ADDRESS')
 
-# Allow OAuth over HTTP in development (remove in production)
-os.environ.setdefault('OAUTHLIB_INSECURE_TRANSPORT', '1')
-
 # Initialise extensions
 db.init_app(app)
 csrf = CSRFProtect(app)
 limiter = Limiter(app, key_func=get_remote_address)
 mail = Mail(app)
-
-# -------------------------------------------------
-# OAUTH BLUEPRINTS
-# -------------------------------------------------
-
-google_bp = make_google_blueprint(
-    client_id=os.environ.get('GOOGLE_CLIENT_ID'),
-    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET'),
-    scope=['profile', 'email'],
-    redirect_url='/auth/google/callback'
-)
-app.register_blueprint(google_bp, url_prefix='/auth')
-
-twitter_bp = make_twitter_blueprint(
-    api_key=os.environ.get('TWITTER_API_KEY'),
-    api_secret=os.environ.get('TWITTER_API_SECRET'),
-    redirect_url='/auth/twitter/callback'
-)
-app.register_blueprint(twitter_bp, url_prefix='/auth')
-
-# Exempt OAuth redirect routes from CSRF (they use OAuth state tokens instead)
-csrf.exempt(google_bp)
-csrf.exempt(twitter_bp)
 
 # -------------------------------------------------
 # FORM DEFINITIONS
@@ -427,92 +399,6 @@ def reset_password(token):
             return redirect(url_for('login'))
 
     return render_template('reset_password.html', form=form, error=error, token=token)
-
-# -------------------------------------------------
-# GOOGLE OAUTH CALLBACK
-# -------------------------------------------------
-
-@app.route('/auth/google/callback')
-def google_callback():
-    if not google.authorized:
-        flash('Google login failed. Please try again.', 'danger')
-        return redirect(url_for('login'))
-
-    resp = google.get('/oauth2/v2/userinfo')
-    if not resp.ok:
-        flash('Could not fetch your Google profile. Please try again.', 'danger')
-        return redirect(url_for('login'))
-
-    info = resp.json()
-    google_id = str(info['id'])
-    email = info.get('email', '').lower()
-    full_name = info.get('name', email)
-
-    # Try to find by OAuth ID first, then by email
-    user = User.query.filter_by(oauth_provider='google', oauth_id=google_id).first()
-    if user is None and email:
-        user = User.query.filter_by(email=email).first()
-        if user:
-            # Link existing email account to Google
-            user.oauth_provider = 'google'
-            user.oauth_id = google_id
-            db.session.commit()
-
-    if user is None:
-        # Create new user via Google
-        user = User(
-            full_name=full_name,
-            email=email or None,
-            oauth_provider='google',
-            oauth_id=google_id,
-            is_verified=True  # Google already verified the email
-        )
-        db.session.add(user)
-        db.session.commit()
-        flash(f'Account created via Google. Welcome, {full_name}!', 'success')
-    else:
-        flash(f'Welcome back, {user.full_name}!', 'success')
-
-    set_user_session(user)
-    return redirect_to_dashboard(user.role)
-
-# -------------------------------------------------
-# TWITTER OAUTH CALLBACK
-# -------------------------------------------------
-
-@app.route('/auth/twitter/callback')
-def twitter_callback():
-    if not twitter.authorized:
-        flash('Twitter login failed. Please try again.', 'danger')
-        return redirect(url_for('login'))
-
-    resp = twitter.get('account/verify_credentials.json')
-    if not resp.ok:
-        flash('Could not fetch your Twitter profile. Please try again.', 'danger')
-        return redirect(url_for('login'))
-
-    info = resp.json()
-    twitter_id = str(info['id'])
-    screen_name = info.get('screen_name', f'user_{twitter_id}')
-    full_name = info.get('name', screen_name)
-
-    user = User.query.filter_by(oauth_provider='twitter', oauth_id=twitter_id).first()
-
-    if user is None:
-        user = User(
-            full_name=full_name,
-            oauth_provider='twitter',
-            oauth_id=twitter_id,
-            is_verified=True  # Twitter account considered verified
-        )
-        db.session.add(user)
-        db.session.commit()
-        flash(f'Account created via Twitter. Welcome, {full_name}!', 'success')
-    else:
-        flash(f'Welcome back, {user.full_name}!', 'success')
-
-    set_user_session(user)
-    return redirect_to_dashboard(user.role)
 
 # -------------------------------------------------
 # DASHBOARD ROUTES
