@@ -14,9 +14,11 @@ import os  # Used to read environment variables from the .env file
 from flask import Flask, render_template, redirect, url_for, flash, session, request
 from flask_wtf.csrf import CSRFError  # So we can handle CSRF errors gracefully
 
-from models import db              # SQLAlchemy database object from models.py
+from models import db, User        # SQLAlchemy database object + User model
 from extensions import csrf, limiter, mail  # Extension objects from extensions.py
-from auth import auth_bp, login_required    # Blueprint and login decorator from auth.py
+from auth import auth_bp, login_required, ProfileForm  # Blueprint, decorator, profile form
+from werkzeug.security import generate_password_hash, check_password_hash  # Password handling
+import re                                  # Regex — used for password strength validation
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -113,6 +115,69 @@ def admin_dashboard():
         flash('You do not have permission to access that page.', 'danger')
         return redirect(url_for('user_dashboard'))
     return render_template('admin_dashboard.html')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PROFILE ROUTE
+# Lets a logged-in user update their name and optionally change their password.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required  # Must be logged in — unauthenticated users go to /login
+def profile():
+    # Look up the current user in the database using their session ID
+    user = User.query.get(session['user_id'])
+
+    # Pre-fill first/last name by splitting the stored full_name on the first space
+    # e.g. "John Smith" → first="John", last="Smith"
+    name_parts = user.full_name.split(' ', 1)
+    first = name_parts[0]
+    last  = name_parts[1] if len(name_parts) > 1 else ''
+
+    form = ProfileForm()
+    error = None
+
+    if form.validate_on_submit():
+        # ── Update name ───────────────────────────────────────────────────
+        new_first = form.first_name.data.strip()
+        new_last  = form.last_name.data.strip()
+        user.full_name = f"{new_first} {new_last}"
+
+        # Update the session so the dashboard greeting reflects the new name immediately
+        session['user_name'] = user.full_name
+
+        # ── Optional password change ──────────────────────────────────────
+        new_password = form.new_password.data
+        if new_password:
+            current_password     = form.current_password.data
+            confirm_new_password = form.confirm_new_password.data
+
+            # Step 1: Verify the user knows their current password
+            if not current_password or not check_password_hash(user.password_hash, current_password):
+                error = "Current password is incorrect."
+            elif new_password != confirm_new_password:
+                error = "New passwords do not match."
+            elif len(new_password) < 8:
+                error = "New password must be at least 8 characters long."
+            elif not re.search(r"\d", new_password):
+                error = "New password must include at least one number."
+            elif not re.search(r"[A-Z]", new_password):
+                error = "New password must include at least one uppercase letter."
+            else:
+                # All checks pass — hash and save the new password
+                user.password_hash = generate_password_hash(new_password)
+
+        if not error:
+            db.session.commit()  # Save name (and password if changed) to the database
+            flash("Profile updated successfully.", "success")
+            return redirect(url_for('profile'))
+
+    elif request.method == 'GET':
+        # On a GET request, pre-fill the name fields with the current values
+        form.first_name.data = first
+        form.last_name.data  = last
+
+    return render_template('profile.html', form=form, error=error)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+</head>
+<body>
+
+    <!-- Flash messages (e.g. "Profile updated successfully!") -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <p class="flash flash-{{ category }}">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <h1>Edit Profile</h1>
+
+    <form method="post">
+    {{ form.hidden_tag() }}  <!-- CSRF Token -->
+
+    <!-- Server-side error (e.g. wrong current password) -->
+    {% if error %}
+        <p class="error">{{ error }}</p>
+    {% endif %}
+
+    <!-- ── Name ─────────────────────────────────────────────────────────── -->
+    <h2>Your name</h2>
+
+    <div class="grid-2">
+        <div>
+            <label for="first_name">First name</label>
+            {{ form.first_name() }}
+        </div>
+        <div>
+            <label for="last_name">Last name</label>
+            {{ form.last_name() }}
+        </div>
+    </div>
+
+    <!-- ── Change password (optional) ──────────────────────────────────── -->
+    <h2>Change password <small style="font-size:0.75em;font-weight:normal;color:#888;">(leave blank to keep current)</small></h2>
+
+    <label for="current_password">Current password</label>
+    {{ form.current_password() }}
+
+    <label for="new_password">New password</label>
+    {{ form.new_password() }}
+
+    <!-- Live strength bar — same logic as registration page -->
+    <div class="strength-bar-wrap" style="background:#e0e0e0;border-radius:4px;height:8px;margin:6px 0 2px;">
+        <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:width 0.3s,background 0.3s;"></div>
+    </div>
+    <p id="strength-label" style="margin:0 0 10px;font-size:0.8rem;color:#888;"></p>
+
+    <label for="confirm_new_password">Confirm new password</label>
+    {{ form.confirm_new_password() }}
+
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+
+    <p><a href="{{ url_for('user_dashboard') }}">Back to dashboard</a></p>
+
+</body>
+
+<script>
+    // Live password strength indicator on the new_password field
+    document.getElementById('new_password').addEventListener('input', function() {
+        const val = this.value;
+        let score = 0;
+
+        if (val.length >= 8)               score++;
+        if (/\d/.test(val))                score++;
+        if (/[A-Z]/.test(val))             score++;
+        if (/[^A-Za-z0-9]/.test(val))      score++;
+
+        const bar   = document.getElementById('strength-bar');
+        const label = document.getElementById('strength-label');
+
+        const levels = [
+            { pct: '0%',   color: '#e0e0e0', text: '',             textColor: '#888' },
+            { pct: '25%',  color: '#e53935', text: 'Weak',         textColor: '#e53935' },
+            { pct: '50%',  color: '#fb8c00', text: 'Fair',         textColor: '#fb8c00' },
+            { pct: '75%',  color: '#c6d21e', text: 'Good',         textColor: '#8a9a00' },
+            { pct: '100%', color: '#43a047', text: 'Strong ✓',     textColor: '#43a047' },
+        ];
+
+        const level = val.length === 0 ? levels[0] : levels[score];
+        bar.style.width      = level.pct;
+        bar.style.background = level.color;
+        label.textContent    = level.text;
+        label.style.color    = level.textColor;
+    });
+</script>
+
+</html>
