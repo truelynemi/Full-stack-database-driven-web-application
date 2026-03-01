@@ -88,6 +88,17 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 
+class ProfileForm(FlaskForm):
+    """Form shown on the /profile page — update name and optionally change password."""
+    first_name = StringField('First Name', validators=[DataRequired()])
+    last_name  = StringField('Last Name',  validators=[DataRequired()])
+    # Password change fields are all optional — only validated if new_password is filled
+    current_password     = PasswordField('Current Password')
+    new_password         = PasswordField('New Password')
+    confirm_new_password = PasswordField('Confirm New Password')
+    submit = SubmitField('Save Changes')
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # TOKEN HELPERS
 # Used to create and verify the secure links sent in emails.

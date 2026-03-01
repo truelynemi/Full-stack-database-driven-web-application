@@ -41,6 +41,12 @@
     <label for="signupPassword">Password</label>
     {{ form.password() }}
 
+    <!-- Live password strength indicator — updated on every keystroke -->
+    <div class="strength-bar-wrap" style="background:#e0e0e0;border-radius:4px;height:8px;margin:6px 0 2px;">
+        <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:width 0.3s,background 0.3s;"></div>
+    </div>
+    <p id="strength-label" style="margin:0 0 10px;font-size:0.8rem;color:#888;">Start typing to check strength</p>
+
     <label for="signupConfirmPassword">Confirm password</label>
     {{ form.confirm_password() }}
 
@@ -60,6 +66,38 @@
 
 <!-- Client-side password validation — runs before the form is even submitted -->
 <script>
+    // ── Live strength indicator ────────────────────────────────────────────
+    // Runs on every keystroke in the password field and updates the bar + label.
+    document.getElementById('password').addEventListener('input', function() {
+        const val = this.value;
+        let score = 0;
+
+        // Award 1 point for each criterion met
+        if (val.length >= 8)               score++;  // Long enough
+        if (/\d/.test(val))                score++;  // Has a number
+        if (/[A-Z]/.test(val))             score++;  // Has an uppercase letter
+        if (/[^A-Za-z0-9]/.test(val))      score++;  // Has a special character (bonus)
+
+        const bar   = document.getElementById('strength-bar');
+        const label = document.getElementById('strength-label');
+
+        // Map score → width, colour, and label text
+        const levels = [
+            { pct: '0%',   color: '#e0e0e0', text: 'Start typing to check strength', textColor: '#888' },
+            { pct: '25%',  color: '#e53935', text: 'Weak',        textColor: '#e53935' },
+            { pct: '50%',  color: '#fb8c00', text: 'Fair',        textColor: '#fb8c00' },
+            { pct: '75%',  color: '#c6d21e', text: 'Good',        textColor: '#8a9a00' },
+            { pct: '100%', color: '#43a047', text: 'Strong ✓',    textColor: '#43a047' },
+        ];
+
+        const level = val.length === 0 ? levels[0] : levels[score];
+        bar.style.width      = level.pct;
+        bar.style.background = level.color;
+        label.textContent    = level.text;
+        label.style.color    = level.textColor;
+    });
+
+    // ── Submit-time validation ────────────────────────────────────────────
     document.getElementById('signupForm').addEventListener('submit', function(e) {
         // Get the values of the two password fields
         let password = document.getElementById('password').value;
