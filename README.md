@@ -15,3 +15,5 @@ This is not a finished project — it’s a template for my exam. Feel free to e
 - Logout route
 - Email Verification
 - Forgot Password / Recovery
+- Terms of Serivce
+- Privacy Policy 
