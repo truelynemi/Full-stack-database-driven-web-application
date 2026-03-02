@@ -15,6 +15,9 @@
 
 import os  # Used to read environment variables from the .env file
 
+from dotenv import load_dotenv  # Loads variables from .env into os.environ
+load_dotenv()                   # Must be called before os.environ.get() reads anything
+
 from flask import Flask, redirect, url_for, flash, request
 from flask_wtf.csrf import CSRFError  # So we can handle CSRF errors gracefully
 

@@ -6,3 +6,4 @@ Flask-Limiter
 Werkzeug
 Flask-Mail
 itsdangerous
+python-dotenv
