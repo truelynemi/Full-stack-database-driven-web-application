@@ -138,6 +138,10 @@ def register():
             elif not re.search(r"[A-Z]", password):
                 error = "Password must include at least one uppercase letter."
 
+            # User must tick the Terms & Conditions checkbox
+            elif not form.agree_terms.data:
+                error = "You must agree to the Terms & Conditions to register."
+
             else:
                 # Check the database — is this email already taken?
                 existing_user = User.query.filter_by(email=email).first()

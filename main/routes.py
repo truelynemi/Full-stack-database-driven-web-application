@@ -32,6 +32,20 @@ def about():
     return render_template('main/about.html')
 
 
+@main_bp.route('/privacy')
+@limiter.exempt
+def privacy():
+    """Public privacy policy page."""
+    return render_template('main/privacy.html')
+
+
+@main_bp.route('/terms')
+@limiter.exempt
+def terms():
+    """Public terms of service page."""
+    return render_template('main/terms.html')
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # DASHBOARD ROUTES
 # These are the pages users land on after logging in.
