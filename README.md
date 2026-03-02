@@ -1,5 +1,6 @@
 # Full-stack database-driven web application
-I will use this repository to create a full-stack development with Flask, SQLite, HTML and more. 
+I will use this repository to create a full-stack development with Flask, SQLite, HTML and more. <br>
+**(Developed with assistance from Claude AI)**
 
 This is not a finished project — it’s a template for my exam. Feel free to explore, learn from it, and build upon it for your own projects.
 
