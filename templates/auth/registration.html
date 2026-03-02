@@ -51,7 +51,8 @@
     {{ form.confirm_password() }}
 
     <label for="agree_terms">
-        {{ form.agree_terms() }} I agree to the Terms &amp; Conditions
+        {{ form.agree_terms() }}
+        I agree to the <a href="{{ url_for('main.terms') }}" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>
     </label>
 
     <button type="submit" class="btn btn-primary auth-btn">
