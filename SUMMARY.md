@@ -14,28 +14,44 @@ Users can create an account, verify their email, log in, log out, and reset thei
 
 ```
 project/
-├── app.py          — starts the app, wires everything together
-├── auth.py         — all login/register/password routes (a "Blueprint")
-├── extensions.py   — shared tools: CSRF protection, rate limiter, email sender
-├── models.py       — the database table definition (User)
-├── requirements.txt — list of packages to install
-├── .gitignore      — tells Git what NOT to commit (e.g. .env, database file)
-├── .env            — your secret credentials (never committed to GitHub)
-└── templates/      — all HTML pages Flask serves to the browser
-    ├── login.html
-    ├── registration.html
-    ├── user_dashboard.html
-    ├── admin_dashboard.html
-    ├── verify_pending.html
-    ├── resend_verification.html
-    ├── forgot_password.html
-    ├── reset_password.html
-    └── about.html
+├── app.py               — starts the app, wires everything together (~70 lines)
+├── extensions.py        — shared tools: CSRF protection, rate limiter, email sender
+├── models.py            — the database table definition (User)
+├── requirements.txt     — list of packages to install
+├── .gitignore           — tells Git what NOT to commit (e.g. .env, database file)
+├── .env                 — your secret credentials (never committed to GitHub)
+│
+├── auth/                — Blueprint package: everything to do with authentication
+│   ├── __init__.py      — creates the Blueprint object
+│   ├── forms.py         — all form classes (LoginForm, RegistrationForm, etc.)
+│   ├── helpers.py       — shared functions: tokens, emails, login_required
+│   └── routes.py        — route handlers: /login, /register, /logout, etc.
+│
+├── main/                — Blueprint package: dashboards, profile, about page
+│   ├── __init__.py      — creates the Blueprint object
+│   └── routes.py        — route handlers: /user_dashboard, /admin_dashboard, /profile, /about
+│
+└── templates/           — all HTML pages, organised by blueprint
+    ├── auth/            — templates for authentication pages
+    │   ├── login.html
+    │   ├── registration.html
+    │   ├── forgot_password.html
+    │   ├── reset_password.html
+    │   ├── verify_pending.html
+    │   └── resend_verification.html
+    └── main/            — templates for dashboard and profile pages
+        ├── about.html
+        ├── user_dashboard.html
+        ├── admin_dashboard.html
+        └── profile.html
 ```
+
+### Why this structure?
+Each Blueprint is a self-contained feature module. To add a new section (e.g. a `shop/` or `api/`), you create a new folder with its own `__init__.py` and `routes.py`, register it in `app.py`, and it doesn't touch any existing code.
 
 ---
 
-## The 8 security features
+## The 7 security features
 
 ### 1. CSRF Protection
 **What it is:** Cross-Site Request Forgery — a type of attack where a malicious website tricks your browser into submitting a form on another site without your knowledge.
@@ -65,14 +81,9 @@ This happens on both the **client side** (JavaScript in the browser before submi
 - Email format is valid
 - Passwords match
 - Password strength rules pass
-- Terms checkbox is ticked
 - Email isn't already registered
 
-### 6. Terms and Conditions
-**What it is:** The user must tick a checkbox agreeing to the Terms & Conditions before their account is created.
-**How it works:** The `agree_terms` field in `RegistrationForm` uses `DataRequired()` — if the checkbox isn't ticked, the form won't submit and an error is shown.
-
-### 7. Rate Limiting
+### 6. Rate Limiting
 **What it is:** Limits how many times someone can hit a route in a given time period. This stops attackers from trying thousands of passwords quickly (brute-force attacks) or flooding the site with fake registrations.
 **What's limited:**
 - `/login` — max 5 requests per minute per IP address
@@ -80,9 +91,9 @@ This happens on both the **client side** (JavaScript in the browser before submi
 - `/forgot-password` — max 5 requests per hour per IP address
 - `/resend-verification` — max 3 requests per hour per IP address
 
-### 8. Client-Side Validation
+### 7. Client-Side Validation
 **What it is:** JavaScript in `registration.html` checks the password before the form is even sent to the server. This gives the user instant feedback without a page reload.
-**Important:** This is a convenience feature only — it can be bypassed by anyone who knows what they're doing. The server-side checks in `auth.py` are the real security.
+**Important:** This is a convenience feature only — it can be bypassed by anyone who knows what they're doing. The server-side checks in `auth/routes.py` are the real security.
 
 ---
 
