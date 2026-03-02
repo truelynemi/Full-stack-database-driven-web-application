@@ -8,7 +8,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms import StringField, PasswordField, SubmitField, BooleanField  # BooleanField used for remember_me
 from wtforms.validators import DataRequired, EqualTo, Email
 
 
@@ -30,10 +30,6 @@ class RegistrationForm(FlaskForm):
         'Confirm Password',
         # EqualTo checks that this field matches the 'password' field
         validators=[DataRequired(), EqualTo('password', message='Passwords must match')]
-    )
-    agree_terms = BooleanField(
-        'I agree to the Terms & Conditions',
-        validators=[DataRequired()]  # DataRequired on a checkbox means it must be ticked
     )
     submit = SubmitField('Sign Up')
 

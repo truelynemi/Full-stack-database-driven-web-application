@@ -51,7 +51,7 @@ Each Blueprint is a self-contained feature module. To add a new section (e.g. a 
 
 ---
 
-## The 8 security features
+## The 7 security features
 
 ### 1. CSRF Protection
 **What it is:** Cross-Site Request Forgery — a type of attack where a malicious website tricks your browser into submitting a form on another site without your knowledge.
@@ -81,14 +81,9 @@ This happens on both the **client side** (JavaScript in the browser before submi
 - Email format is valid
 - Passwords match
 - Password strength rules pass
-- Terms checkbox is ticked
 - Email isn't already registered
 
-### 6. Terms and Conditions
-**What it is:** The user must tick a checkbox agreeing to the Terms & Conditions before their account is created.
-**How it works:** The `agree_terms` field in `RegistrationForm` uses `DataRequired()` — if the checkbox isn't ticked, the form won't submit and an error is shown.
-
-### 7. Rate Limiting
+### 6. Rate Limiting
 **What it is:** Limits how many times someone can hit a route in a given time period. This stops attackers from trying thousands of passwords quickly (brute-force attacks) or flooding the site with fake registrations.
 **What's limited:**
 - `/login` — max 5 requests per minute per IP address
@@ -96,7 +91,7 @@ This happens on both the **client side** (JavaScript in the browser before submi
 - `/forgot-password` — max 5 requests per hour per IP address
 - `/resend-verification` — max 3 requests per hour per IP address
 
-### 8. Client-Side Validation
+### 7. Client-Side Validation
 **What it is:** JavaScript in `registration.html` checks the password before the form is even sent to the server. This gives the user instant feedback without a page reload.
 **Important:** This is a convenience feature only — it can be bypassed by anyone who knows what they're doing. The server-side checks in `auth/routes.py` are the real security.
 
