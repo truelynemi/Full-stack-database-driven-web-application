@@ -1,10 +1,14 @@
-# Contains
+# Full-stack database-driven web application
+I will use this repository to create a full-stack development with Flask, SQLite, HTML and more. 
+
+This is not a finished project — it’s a template for my exam. Feel free to explore, learn from it, and build upon it for your own projects.
+
+## Features Implemented
 - CSRF Protection
 - Email Validation (Email Regex)
 - Password Hashing
 - Enhanced Password Validation
 - Server-Side Form Validation
-- Terms and Conditions
 - Rate Limiting
 - Client-Size Validation
 - Logout route
