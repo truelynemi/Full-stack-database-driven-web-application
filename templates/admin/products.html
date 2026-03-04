@@ -1,39 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin — Manage Products</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
-</head>
-<body>
+{% extends 'base_admin.html' %}
 
-<!-- ── Navigation ── -->
-<nav class="navbar">
-    <a href="{{ url_for('main.admin_dashboard') }}" class="navbar-brand">MyApp Admin</a>
-    <ul class="navbar-links">
-        <li><a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a></li>
-        <li><a href="{{ url_for('shop.catalogue') }}">View Shop</a></li>
-        <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
-    </ul>
-</nav>
+{% block title %}Admin — Manage Products{% endblock %}
 
+{% block content %}
 <!-- ── Page header ── -->
 <div class="page-header">
     <h1>Manage Products</h1>
     <p>Add, edit, or remove products from the shop.</p>
 </div>
-
-<!-- ── Flash messages ── -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div class="flash-container">
-    {% for category, message in messages %}
-    <div class="flash {{ category }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-{% endwith %}
 
 <div class="container">
     <div class="admin-card">
@@ -91,6 +65,4 @@
         {% endif %}
     </div>
 </div>
-
-</body>
-</html>
+{% endblock %}

@@ -1,47 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Cart — Shop</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
-</head>
-<body>
+{% extends 'base_shop.html' %}
 
-<!-- ── Navigation ── -->
-<nav class="navbar">
-    <a href="{{ url_for('main.user_dashboard') }}" class="navbar-brand">MyApp</a>
-    <ul class="navbar-links">
-        <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
-        <li><a href="{{ url_for('shop.catalogue') }}">Shop</a></li>
-        <li><a href="{{ url_for('shop.orders') }}">My Orders</a></li>
-        <li>
-            <a href="{{ url_for('shop.cart') }}" class="cart-link">
-                🛒 Cart
-                {% if cart_count > 0 %}
-                <span class="cart-badge">{{ cart_count }}</span>
-                {% endif %}
-            </a>
-        </li>
-        <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
-    </ul>
-</nav>
+{% block title %}Your Cart — Shop{% endblock %}
 
+{% block content %}
 <!-- ── Page header ── -->
 <div class="page-header">
     <h1>Your Cart</h1>
 </div>
-
-<!-- ── Flash messages ── -->
-{% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div class="flash-container">
-    {% for category, message in messages %}
-    <div class="flash {{ category }}">{{ message }}</div>
-    {% endfor %}
-</div>
-{% endif %}
-{% endwith %}
 
 <!-- ── Cart content ── -->
 <div class="container">
@@ -104,6 +69,4 @@
     </div>
     {% endif %}
 </div>
-
-</body>
-</html>
+{% endblock %}
