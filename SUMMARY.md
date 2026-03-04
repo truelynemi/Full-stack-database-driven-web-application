@@ -5,8 +5,13 @@ Everything built in this project, explained in plain English.
 
 ## What is this project?
 
-A **user registration and login system** built with Python and Flask.
-Users can create an account, verify their email, log in, log out, and reset their password if they forget it. The project focuses on doing all of this **securely**.
+A **full-stack web application** built with Python and Flask. It has three main parts:
+
+1. **Auth system** — users can register, verify their email, log in, log out, and reset their password securely.
+2. **Shop** — logged-in users can browse a product catalogue, add items to a cart, and pay via Stripe.
+3. **Admin panel** — admin accounts can add, edit, and deactivate products without touching the database directly.
+
+The project is designed to be a starting point you can fork and build on top of.
 
 ---
 
@@ -16,7 +21,7 @@ Users can create an account, verify their email, log in, log out, and reset thei
 project/
 ├── app.py               — starts the app, wires everything together
 ├── extensions.py        — shared tools: CSRF protection, rate limiter, email sender
-├── models.py            — the database table definition (User)
+├── models.py            — all database table definitions (User, Product, Order, OrderItem)
 ├── requirements.txt     — list of packages to install
 ├── .gitignore           — tells Git what NOT to commit (e.g. .env, database file)
 ├── .env                 — your secret credentials (never committed to GitHub)
@@ -27,38 +32,54 @@ project/
 │   ├── helpers.py       — shared functions: tokens, emails, login_required
 │   └── routes.py        — route handlers: /login, /register, /logout, etc.
 │
-├── main/                — Blueprint package: dashboards, profile, and public pages
+├── main/                — Blueprint package: dashboards, profile, public pages, admin products
 │   ├── __init__.py      — creates the Blueprint object
-│   └── routes.py        — route handlers: /user_dashboard, /admin_dashboard, /profile, /about, /privacy, /terms
+│   └── routes.py        — /user_dashboard, /admin_dashboard, /profile, /about, /privacy, /terms,
+│                          /admin/products, /admin/products/new, /admin/products/<id>/edit|delete
+│
+├── shop/                — Blueprint package: product catalogue, cart, checkout, orders
+│   ├── __init__.py      — creates the Blueprint object
+│   └── routes.py        — /shop, /shop/<id>, /cart, /cart/add|remove, /checkout/*, /orders
 │
 ├── static/              — public files served directly (CSS, images, etc.)
 │   └── css/
 │       ├── privacy.css  — styles for the Privacy Policy page (green scheme)
-│       └── terms.css    — styles for the Terms of Service page (red scheme)
+│       ├── terms.css    — styles for the Terms of Service page (red scheme)
+│       └── shop.css     — styles for all shop, cart, and admin product pages
 │
 └── templates/           — all HTML pages, organised by blueprint
-    ├── auth/            — templates for authentication pages
+    ├── auth/            — login, register, forgot/reset password, verify pending
     │   ├── login.html
     │   ├── registration.html
     │   ├── forgot_password.html
     │   ├── reset_password.html
     │   ├── verify_pending.html
     │   └── resend_verification.html
-    └── main/            — templates for dashboard, profile, and legal pages
-        ├── about.html
-        ├── user_dashboard.html
-        ├── admin_dashboard.html
-        ├── profile.html
-        ├── privacy.html — Privacy Policy page with sticky quick-nav sidebar
-        └── terms.html   — Terms of Service page with sticky quick-nav sidebar
+    ├── main/            — dashboards, profile, and legal pages
+    │   ├── about.html
+    │   ├── user_dashboard.html
+    │   ├── admin_dashboard.html
+    │   ├── profile.html
+    │   ├── privacy.html — Privacy Policy with sticky quick-nav sidebar
+    │   └── terms.html   — Terms of Service with sticky quick-nav sidebar
+    ├── shop/            — customer-facing shop pages
+    │   ├── catalogue.html  — product grid
+    │   ├── product.html    — single product detail
+    │   ├── cart.html       — cart contents + checkout button
+    │   ├── success.html    — post-payment order confirmation
+    │   ├── cancel.html     — cancelled payment page
+    │   └── orders.html     — user's full order history
+    └── admin/           — admin-only product management
+        ├── products.html      — table of all products with edit/delete actions
+        └── product_form.html  — add/edit product form
 ```
 
 ### Why this structure?
-Each Blueprint is a self-contained feature module. To add a new section (e.g. a `shop/` or `api/`), you create a new folder with its own `__init__.py` and `routes.py`, register it in `app.py`, and it doesn't touch any existing code.
+Each Blueprint is a self-contained feature module. To add another section (e.g. an `api/` or `blog/`), you create a new folder with its own `__init__.py` and `routes.py`, register it in `app.py`, and it doesn't touch any existing code.
 
 ---
 
-## The 7 security features
+## The 8 security features
 
 ### 1. CSRF Protection
 **What it is:** Cross-Site Request Forgery — a type of attack where a malicious website tricks your browser into submitting a form on another site without your knowledge.
@@ -146,13 +167,59 @@ This happens on both the **client side** (JavaScript in the browser before submi
 
 ---
 
+## How the shop works
+
+### Customer flow
+1. Log in → go to `/shop` → browse all active products in a grid
+2. Click **"Add to Cart"** on any product (available on the catalogue and the product detail page)
+3. The cart is stored in the **Flask session** (server-side — no extra database table needed)
+4. Go to `/cart` → see all items, quantities, and the running subtotal
+5. Click **"Checkout"** → the server creates a Stripe Checkout Session and redirects to Stripe's hosted payment page
+6. On Stripe's page: enter card details and pay
+7. Stripe redirects back to `/checkout/success?session_id=...`
+8. The server asks Stripe "was this actually paid?" — if yes, saves the Order and OrderItems to the database and clears the cart
+9. User sees a success page with their full order summary
+10. All past orders are visible at `/orders`
+
+### Cart design decision
+The cart lives in the session rather than the database. This keeps it simple — no cleanup jobs needed for abandoned carts. The trade-off is that the cart clears if the user logs out or their session expires. For a production app you could persist the cart to the database to survive logouts.
+
+---
+
+## How admin product management works
+
+**Accessing it:** Log in as an admin → go to `/admin/products`. This route is protected — non-admins are redirected away.
+
+**What admins can do and what happens in the database:**
+
+| Action | URL | What happens in the DB |
+|--------|-----|------------------------|
+| View all products | `/admin/products` | `SELECT * FROM products ORDER BY created_at DESC` |
+| Add a new product | `/admin/products/new` | `INSERT` a new row into `products` |
+| Edit a product | `/admin/products/<id>/edit` | `UPDATE` the existing `products` row |
+| Delete a product | `/admin/products/<id>/delete` | `DELETE` the row from `products` |
+
+**Deactivating vs deleting:**
+Unchecking "Active" when editing sets `is_active = False`. The product disappears from the customer shop (which filters `WHERE is_active = TRUE`) but the database row is kept. This is the **safe option** for products that have been ordered — past `order_items` rows still reference the product correctly.
+
+Deleting a product removes the row entirely. Only do this for products that have **never been ordered**. If orders exist for that product, the `order_items.product_id` foreign key will point to a missing row, which will cause errors on the orders page.
+
+**Price changes:** Editing a product's price only affects future purchases. Past `order_items` rows store a `unit_price` snapshot (the price at the time of purchase), so historical orders always show the correct amount — even if the product price changes later.
+
+**Making yourself an admin:** Open `app.db` with a SQLite browser (e.g. [DB Browser for SQLite](https://sqlitebrowser.org/)) and change the `role` column from `'user'` to `'admin'` for your account row. Or run this one-liner:
+```
+python -c "from app import app; from models import db, User; app.app_context().push(); u = User.query.filter_by(email='you@example.com').first(); u.role='admin'; db.session.commit(); print('Done')"
+```
+
+---
+
 ## The database
 
 **Type:** SQLite — a single file called `app.db` stored in the project folder. No separate database server needed.
 
 **ORM:** SQLAlchemy — lets us work with Python objects instead of writing raw SQL.
 
-**The `users` table** (one row per user):
+### `users` table (one row per registered user)
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -163,6 +230,75 @@ This happens on both the **client side** (JavaScript in the browser before submi
 | `role` | String | `'user'` or `'admin'` |
 | `join_date` | DateTime | Set automatically when account is created |
 | `is_verified` | Boolean | `False` until they click the email link |
+
+### `products` table (one row per product in the shop)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | Integer | Auto-incrementing primary key |
+| `name` | String | Product name shown in the shop |
+| `description` | Text | Full product description |
+| `price` | Integer | Price in **pence** (e.g. `999` = £9.99) — stored as an integer to avoid floating-point rounding errors |
+| `image_url` | String | Optional URL to a product image; leave blank for a default icon |
+| `is_active` | Boolean | `True` = visible to customers; `False` = hidden from shop but kept in DB |
+| `created_at` | DateTime | Set automatically when the product is created |
+
+### `orders` table (one row per completed checkout)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | Integer | Auto-incrementing primary key |
+| `user_id` | Integer | Foreign key → `users.user_id` (who placed the order) |
+| `stripe_checkout_session_id` | String | Stripe's unique session ID — used to verify payment and prevent double-processing |
+| `amount_total` | Integer | Total amount paid in pence |
+| `status` | String | `'pending'` when created; `'paid'` after Stripe confirms; `'failed'` on error |
+| `created_at` | DateTime | Set automatically when the order is created |
+
+### `order_items` table (one row per product line within an order)
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | Integer | Auto-incrementing primary key |
+| `order_id` | Integer | Foreign key → `orders.id` |
+| `product_id` | Integer | Foreign key → `products.id` |
+| `quantity` | Integer | How many of this product were bought |
+| `unit_price` | Integer | Price **at time of purchase** in pence — a snapshot so historical orders stay accurate even if the product's price is later changed |
+
+---
+
+## Stripe integration
+
+### Setting up Stripe
+1. Create a free account at [stripe.com](https://stripe.com)
+2. In the Stripe dashboard, make sure you're in **Test mode** (toggle in the top-left corner)
+3. Go to **Developers → API keys**
+4. Copy the **Publishable key** (`pk_test_...`) and **Secret key** (`sk_test_...`)
+5. Add both to your `.env` file (see the "How to run" section below)
+
+The **secret key** is used server-side only and must never be exposed in HTML or JavaScript. The **publishable key** is safe to include in frontend code if needed.
+
+### Test card (no real money charged)
+Use these details on Stripe's test payment page:
+
+```
+Card number:  4242 4242 4242 4242
+Expiry:       Any future date  (e.g. 12/29)
+CVC:          Any 3 digits     (e.g. 123)
+```
+
+Other useful test cards:
+- `4000 0025 0000 3155` — triggers a 3D Secure authentication challenge
+- `4000 0000 0000 9995` — always declines (useful for testing error handling)
+
+### Going live
+When you're ready to accept real payments:
+1. Switch Stripe to **Live mode** in the dashboard
+2. Copy your live keys (`sk_live_...`, `pk_live_...`)
+3. Replace the test keys in your `.env` file with the live keys
+4. **No code changes needed** — the app works identically in both modes
+
+### Changing currency
+The app currently charges in GBP. To switch, find `'currency': 'gbp'` in `shop/routes.py` and change it to any lowercase [ISO 4217 currency code](https://en.wikipedia.org/wiki/ISO_4217) (e.g. `'usd'`, `'eur'`, `'aud'`).
 
 ---
 
@@ -179,11 +315,16 @@ Create a file called `.env` in the project folder (same place as `app.py`):
 SECRET_KEY=any-long-random-string-you-choose
 GMAIL_ADDRESS=youremail@gmail.com
 GMAIL_APP_PASSWORD=xxxx-xxxx-xxxx-xxxx
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_PUBLISHABLE_KEY=pk_test_...
 ```
-To get a Gmail App Password:
+
+**Gmail App Password:**
 1. Enable 2-Step Verification on your Google account
-2. Go to myaccount.google.com/apppasswords
+2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
 3. Create a new app password and paste it above
+
+**Stripe keys:** See the "Stripe integration" section above.
 
 ### 3. Run the app
 ```
@@ -208,3 +349,4 @@ Visit: http://127.0.0.1:5000/register
 | Werkzeug | Provides password hashing (comes with Flask) |
 | itsdangerous | Creates signed, expiring tokens for email links |
 | python-dotenv | Loads `.env` file into environment variables at startup |
+| stripe | Processes payments via Stripe Checkout (hosted payment page) |
