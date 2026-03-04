@@ -1,5 +1,5 @@
 # Project Summary
-Everything built in this project, explained in plain English.
+Everything built in this project, explained in plain English. Written as a reference for documentation and exam use.
 
 ---
 
@@ -11,7 +11,21 @@ A **full-stack web application** built with Python and Flask. It has three main 
 2. **Shop** — logged-in users can browse a product catalogue, add items to a cart, and pay via Stripe.
 3. **Admin panel** — admin accounts can add, edit, and deactivate products without touching the database directly.
 
-The project is designed to be a starting point you can fork and build on top of.
+---
+
+## Quick start (exam / demo)
+
+```
+pip install -r requirements.txt
+# Create .env with SECRET_KEY, GMAIL_ADDRESS, GMAIL_APP_PASSWORD, STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY
+python seed.py   # creates tables + admin account + demo products
+python app.py
+```
+
+| Account | Email | Password |
+|---------|-------|----------|
+| Admin   | admin@admin.com | Admin1234 |
+| Test user | user@test.com | User1234 |
 
 ---
 
@@ -20,333 +34,417 @@ The project is designed to be a starting point you can fork and build on top of.
 ```
 project/
 ├── app.py               — starts the app, wires everything together
-├── extensions.py        — shared tools: CSRF protection, rate limiter, email sender
 ├── models.py            — all database table definitions (User, Product, Order, OrderItem)
+├── extensions.py        — shared extension objects: CSRF, rate limiter, mail sender
+├── seed.py              — one-time setup script: creates tables, admin user, demo products
 ├── requirements.txt     — list of packages to install
 ├── .gitignore           — tells Git what NOT to commit (e.g. .env, database file)
 ├── .env                 — your secret credentials (never committed to GitHub)
 │
-├── auth/                — Blueprint package: everything to do with authentication
-│   ├── __init__.py      — creates the Blueprint object
-│   ├── forms.py         — all form classes (LoginForm, RegistrationForm, etc.)
-│   ├── helpers.py       — shared functions: tokens, emails, login_required
-│   └── routes.py        — route handlers: /login, /register, /logout, etc.
+├── auth/                — Blueprint: everything to do with authentication
+│   ├── __init__.py      — creates the Blueprint object (auth_bp)
+│   ├── forms.py         — WTForms form classes: LoginForm, RegistrationForm, ProfileForm, etc.
+│   ├── helpers.py       — shared functions: token generation, email sending, login_required
+│   └── routes.py        — route handlers: /login, /register, /logout, /verify/*, /forgot-password, etc.
 │
-├── main/                — Blueprint package: dashboards, profile, public pages, admin products
-│   ├── __init__.py      — creates the Blueprint object
+├── main/                — Blueprint: dashboards, profile, public pages, admin product management
+│   ├── __init__.py      — creates the Blueprint object (main_bp)
 │   └── routes.py        — /user_dashboard, /admin_dashboard, /profile, /about, /privacy, /terms,
 │                          /admin/products, /admin/products/new, /admin/products/<id>/edit|delete
 │
-├── shop/                — Blueprint package: product catalogue, cart, checkout, orders
-│   ├── __init__.py      — creates the Blueprint object
+├── shop/                — Blueprint: product catalogue, cart, checkout, orders
+│   ├── __init__.py      — creates the Blueprint object (shop_bp)
 │   └── routes.py        — /shop, /shop/<id>, /cart, /cart/add|remove, /checkout/*, /orders
 │
-├── static/              — public files served directly (CSS, images, etc.)
+├── static/              — public files served directly (CSS, images)
 │   └── css/
 │       ├── privacy.css  — styles for the Privacy Policy page (green scheme)
 │       ├── terms.css    — styles for the Terms of Service page (red scheme)
 │       └── shop.css     — styles for all shop, cart, and admin product pages
 │
 └── templates/           — all HTML pages, organised by blueprint
-    ├── auth/            — login, register, forgot/reset password, verify pending
+    ├── auth/
     │   ├── login.html
     │   ├── registration.html
     │   ├── forgot_password.html
     │   ├── reset_password.html
     │   ├── verify_pending.html
     │   └── resend_verification.html
-    ├── main/            — dashboards, profile, and legal pages
+    ├── main/
     │   ├── about.html
     │   ├── user_dashboard.html
     │   ├── admin_dashboard.html
     │   ├── profile.html
-    │   ├── privacy.html — Privacy Policy with sticky quick-nav sidebar
-    │   └── terms.html   — Terms of Service with sticky quick-nav sidebar
-    ├── shop/            — customer-facing shop pages
-    │   ├── catalogue.html  — product grid
-    │   ├── product.html    — single product detail
-    │   ├── cart.html       — cart contents + checkout button
-    │   ├── success.html    — post-payment order confirmation
-    │   ├── cancel.html     — cancelled payment page
-    │   └── orders.html     — user's full order history
-    └── admin/           — admin-only product management
-        ├── products.html      — table of all products with edit/delete actions
-        └── product_form.html  — add/edit product form
+    │   ├── privacy.html
+    │   └── terms.html
+    ├── shop/
+    │   ├── catalogue.html
+    │   ├── product.html
+    │   ├── cart.html
+    │   ├── success.html
+    │   ├── cancel.html
+    │   └── orders.html
+    └── admin/
+        ├── products.html
+        └── product_form.html
 ```
 
-### Why this structure?
-Each Blueprint is a self-contained feature module. To add another section (e.g. an `api/` or `blog/`), you create a new folder with its own `__init__.py` and `routes.py`, register it in `app.py`, and it doesn't touch any existing code.
+### Why Blueprints?
+Each Blueprint is a self-contained feature module with its own `__init__.py` and `routes.py`. Blueprints register their routes with `app.register_blueprint()` in `app.py`. The benefit: adding a new section (e.g. `api/` or `blog/`) means creating one new folder — no existing files need to be touched. It also makes it obvious where to look for any given feature.
 
 ---
 
 ## The 8 security features
 
 ### 1. CSRF Protection
-**What it is:** Cross-Site Request Forgery — a type of attack where a malicious website tricks your browser into submitting a form on another site without your knowledge.
-**How we stop it:** Every form includes a hidden random token generated by Flask-WTF. When the form is submitted, the server checks that the token is valid. If someone tries to forge a request from another site, they won't have the correct token, and the request is rejected.
+**What it is:** Cross-Site Request Forgery — a malicious website tricks your browser into submitting a form on another site without your knowledge.
+
+**How it works in this project:**
+- Flask-WTF is initialised in `extensions.py` as `csrf = CSRFProtect()` and attached to the app in `app.py` with `csrf.init_app(app)`. This enables CSRF protection **globally** — every POST form must include a valid token.
+- Every WTForms form class (e.g. `LoginForm`, `RegistrationForm`) inherits from `FlaskForm`, which automatically injects a hidden `{{ form.hidden_tag() }}` field into templates. This field contains a random token signed with the app's `SECRET_KEY`.
+- When a form is submitted, Flask-WTF checks the token. If it's missing or wrong, the submission is rejected.
+- The CSRF error handler in `app.py` catches `CSRFError` and shows a user-friendly flash message instead of a raw error page.
 
 ### 2. Email Validation (Regex)
-**What it is:** Making sure the email address entered looks like a real email.
-**How we do it:** We use a regular expression (`re.match`) that checks the format: `something@something.something`. We also use WTForms' built-in `Email()` validator. Two layers means more reliability.
+**What it is:** Checking that the email address entered looks like a real email.
+
+**How it works in this project:**
+- Two-layer check on registration (`auth/routes.py`):
+  1. WTForms `Email()` validator (from `wtforms.validators`) — checks basic format.
+  2. A custom regex in the route: `re.match(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", email)` — pattern means: one or more valid characters, then `@`, then a domain name, then `.`, then at least 2 letters.
+- Email is also normalised before any check: `email.strip().lower()` — removes spaces and makes it lowercase so `User@Test.COM` and `user@test.com` are treated as the same address.
 
 ### 3. Password Hashing
-**What it is:** We never store the user's real password in the database. If the database was ever stolen, attackers still couldn't read anyone's password.
-**How we do it:** We use `generate_password_hash()` from Werkzeug. It applies a one-way algorithm (PBKDF2) that turns "MyPassword1" into a scrambled string like `pbkdf2:sha256:...`. To check a login, we use `check_password_hash()` which compares the hashes — not the raw passwords.
+**What it is:** Passwords are never stored as plain text. If the database is ever stolen, attackers can't read any password.
+
+**How it works in this project:**
+- `generate_password_hash(password)` from `werkzeug.security` is called whenever a password is saved (registration, password reset, profile password change). It produces a hash string like `pbkdf2:sha256:600000$salt$hash`.
+- `check_password_hash(stored_hash, submitted_password)` is called on every login. It hashes the submitted password and compares it — the raw password is never compared directly.
+- **Why PBKDF2 and not plain SHA256?** SHA256 is fast — a GPU can compute billions of hashes per second, making brute-force easy. PBKDF2 applies the hash function 600,000 times (iterations) by default, making each attempt thousands of times slower. It also includes a random **salt** per password, so two users with the same password get different hashes.
 
 ### 4. Enhanced Password Validation
-**What it is:** Forcing users to pick a password that's harder to guess.
-**Rules we enforce:**
-- At least 8 characters long
-- Must contain at least one number (0–9)
-- Must contain at least one uppercase letter (A–Z)
+**What it is:** Forcing users to pick a harder-to-guess password.
 
-This happens on both the **client side** (JavaScript in the browser before submission) and the **server side** (Python in auth.py, which is the real check).
+**Rules enforced (in `auth/routes.py` using `re` module):**
+- Minimum 8 characters: `len(password) < 8`
+- At least one number: `re.search(r"\d", password)`
+- At least one uppercase letter: `re.search(r"[A-Z]", password)`
+
+These same rules are re-applied on the password reset page and the profile password-change form.
 
 ### 5. Server-Side Form Validation
-**What it is:** Even if someone bypasses the browser's checks (e.g. by sending a request directly), the server still validates everything.
-**What we check on the server:**
-- All required fields are filled in
-- Email format is valid
-- Passwords match
-- Password strength rules pass
-- Email isn't already registered
+**What it is:** Even if someone bypasses browser-side checks (e.g. by using curl or Postman directly), the server still validates everything.
+
+**What is checked server-side on registration:**
+1. All required fields are present
+2. Email regex matches
+3. Passwords match
+4. Password is 8+ characters
+5. Password contains a digit
+6. Password contains an uppercase letter
+7. Terms checkbox is ticked (`form.agree_terms.data`)
+8. Email is not already in the database (`User.query.filter_by(email=email).first()`)
+
+Only if all checks pass does the account get created.
 
 ### 6. Rate Limiting
-**What it is:** Limits how many times someone can hit a route in a given time period. This stops attackers from trying thousands of passwords quickly (brute-force attacks) or flooding the site with fake registrations.
-**What's limited:**
-- `/login` — max 5 requests per minute per IP address
-- `/register` — max 5 requests per minute per IP address
-- `/forgot-password` — max 5 requests per hour per IP address
-- `/resend-verification` — max 3 requests per hour per IP address
+**What it is:** Limits how many requests a single IP address can make to a route per time window. Stops brute-force attacks and mass registration spam.
+
+**Implemented with Flask-Limiter (`extensions.py` → `limiter = Limiter(...)`).**
+
+| Route | Limit | Reason |
+|-------|-------|--------|
+| `/login` | 5 per minute | Prevents password guessing |
+| `/register` | 5 per minute | Prevents mass account creation |
+| `/forgot-password` | 5 per hour | Prevents reset-link spam |
+| `/resend-verification` | 3 per hour | Prevents email flooding |
+| `/about`, `/privacy`, `/terms` | Exempt (`@limiter.exempt`) | Public info pages, no need to restrict |
 
 ### 7. Client-Side Validation
-**What it is:** JavaScript in `registration.html` checks the password before the form is even sent to the server. This gives the user instant feedback without a page reload.
-**Important:** This is a convenience feature only — it can be bypassed by anyone who knows what they're doing. The server-side checks in `auth/routes.py` are the real security.
+**What it is:** JavaScript in `registration.html` checks the password before the form is submitted. Gives users instant feedback without a page reload.
+
+**Important:** This is a convenience feature only. It can be bypassed by anyone who disables JavaScript or sends a raw request. The server-side checks in `auth/routes.py` are the real security — the client-side is just UX.
 
 ### 8. Terms & Conditions Agreement
-**What it is:** Users must tick a checkbox confirming they agree to the Terms of Service before their account is created.
-**How we enforce it:** The checkbox is validated on both the client (HTML `required`) and the server (`auth/routes.py` checks `form.agree_terms.data`). If unticked, registration is blocked with a clear error message. The label links to the full Terms of Service page (`/terms`) which opens in a new tab.
+**What it is:** Users must tick a checkbox agreeing to the Terms of Service before their account is created.
+
+**How it works:**
+- `RegistrationForm` in `auth/forms.py` has `agree_terms = BooleanField(...)`.
+- The route checks `form.agree_terms.data` and returns an error if it's `False`.
+- The checkbox label links to `/terms` (opens in a new tab) so users can read the full terms.
+
+---
+
+## How sessions work (login state)
+
+Flask sessions are **signed cookies** stored in the user's browser. The cookie is signed with `SECRET_KEY` — this means the user can read the contents but cannot tamper with them (any modification breaks the signature and Flask rejects it).
+
+**What gets stored in the session on login** (`auth/helpers.py` → `set_user_session()`):
+
+```python
+session.permanent = remember   # True = session survives browser close (Remember Me)
+session['user_id']   = user.user_id    # Used to look up user on future requests
+session['user_name'] = user.full_name  # Shown in the UI ("Welcome, John!")
+session['user_role'] = user.role       # 'user' or 'admin' — controls routing
+```
+
+**Remember Me:** When the user ticks "Remember Me" on the login form, `session.permanent` is set to `True`. Flask then uses `PERMANENT_SESSION_LIFETIME` (default 31 days) as the cookie expiry, so the session survives after the browser is closed.
+
+**Logout** (`/logout`): calls `session.clear()` — wipes everything from the session, making the user anonymous again.
+
+**Checking login:** Routes use `'user_id' in session` to determine if the user is logged in.
+
+---
+
+## How `@login_required` works
+
+`login_required` is a custom decorator defined in `auth/helpers.py`:
+
+```python
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('auth.login'))
+        return f(*args, **kwargs)
+    return decorated
+```
+
+When placed above a route (`@login_required`), it runs first and checks for `user_id` in the session. If missing, the user is redirected to `/login` before the route function even runs. `@wraps(f)` preserves the original function's name (important for Flask's URL routing).
+
+---
+
+## How admin-only routes work
+
+Admin routes use two layers of protection:
+
+1. `@login_required` — ensures the user is logged in.
+2. `_admin_only()` helper — checks `session.get('user_role') != 'admin'`. If the user is logged in but not an admin, they are redirected to the user dashboard with an error flash.
+
+```python
+@main_bp.route('/admin/products')
+@login_required
+def admin_products():
+    guard = _admin_only()
+    if guard:
+        return guard
+    ...
+```
+
+This means a regular user who tries to visit `/admin/products` is blocked at the `_admin_only()` check, even though they are logged in.
+
+---
+
+## How tokens work (email verification & password reset)
+
+Tokens are created by `itsdangerous.URLSafeTimedSerializer` (`auth/helpers.py`).
+
+**Generating a token:**
+```python
+s = URLSafeTimedSerializer(current_app.secret_key)
+token = s.dumps(user_email, salt='email-verify')
+```
+The email address is serialised and **signed** (not encrypted — the content is readable) using HMAC with the `SECRET_KEY`. The `salt` makes tokens for different purposes incompatible: a token created with `salt='email-verify'` cannot be used at the `/reset-password` route (which expects `salt='password-reset'`), even though both are signed with the same key.
+
+**Verifying a token:**
+```python
+email = s.loads(token, salt='email-verify', max_age=3600)
+```
+`max_age=3600` means the token expires after 1 hour. If tampered with, `BadSignature` is raised. If expired, `SignatureExpired` is raised. Both are caught in the routes and shown as user-friendly error messages.
+
+**Anti-enumeration:** Both `/forgot-password` and `/resend-verification` always show the **same vague response** regardless of whether the email exists in the database. This prevents attackers from probing which emails are registered.
 
 ---
 
 ## Authentication flow
 
 ### Registration
-1. User fills in the form at `/register`
-2. Client-side JS checks password strength immediately
-3. Form submits → server validates everything again
-4. If valid: account is created in the database with `is_verified=False`
-5. A verification email is sent to their address
-6. User is redirected to the "Check your inbox" page
+1. User fills in `/register`
+2. Client-side JS checks password strength
+3. POST → server runs the full validation chain (8 checks)
+4. If valid: `User` row created with `is_verified=False`, password stored as hash
+5. `send_verification_email()` builds a token URL and sends it via Gmail SMTP
+6. User redirected to "Check your inbox" page (`/verify-pending`)
 
 ### Email verification
-1. User gets an email with a link like `/verify/abc123token`
-2. The token contains their email address, signed with the app's secret key
-3. When clicked, the server decodes the token, finds the user, sets `is_verified=True`
-4. User is redirected to login
+1. User clicks the link: `/verify/<token>`
+2. `verify_token(token, salt='email-verify')` decodes the token → email address
+3. `User.query.filter_by(email=email).first()` finds the account
+4. `user.is_verified = True` → saved to DB
+5. User redirected to `/login`
 
 ### Login
-1. User submits email + password at `/login`
-2. Server looks up the user by email
-3. Checks the password against the stored hash
-4. Checks `is_verified=True` — if not verified, login is blocked
-5. If everything passes: user data is stored in the **session** (a secure signed cookie)
-6. User is redirected to their dashboard (admin or regular)
-
-### Logout
-1. User clicks "Log out"
-2. `/logout` clears the session (erases all stored user data from the cookie)
-3. User is redirected to login
+1. POST to `/login` with email + password
+2. `email.strip().lower()` normalises the input
+3. `User.query.filter_by(email=email).first()` looks up the account
+4. `check_password_hash(user.password_hash, password)` verifies the password
+5. `user.is_verified` is checked — unverified accounts are blocked with a message pointing to `/resend-verification`
+6. On success: `set_user_session(user, remember=form.remember_me.data)` writes session data
+7. `redirect_to_dashboard(user.role)` sends admin → `/admin_dashboard`, others → `/user_dashboard`
 
 ### Forgot password
-1. User submits their email at `/forgot-password`
-2. Server sends a reset email with a signed token link (expires in 1 hour)
-3. User clicks the link → taken to `/reset-password/<token>`
-4. Server verifies the token, lets user set a new password
-5. New password is hashed and saved; account is auto-verified
+1. User submits email at `/forgot-password`
+2. Server always shows the same message (anti-enumeration)
+3. If user exists: `send_password_reset_email()` sends a token link (different salt, same 1-hour expiry)
+4. User clicks `/reset-password/<token>` → same strength checks as registration
+5. `user.password_hash = generate_password_hash(new_password)` + `user.is_verified = True` saved
+
+### Profile update (`/profile`)
+- User can update their full name at any time.
+- Password change is **optional**: only processed if `new_password` field is filled in.
+- Requires correct current password before allowing a change (`check_password_hash`).
+- Same strength rules applied to the new password.
+- Session `user_name` is updated immediately so the greeting in the UI reflects the new name.
 
 ---
 
 ## How the shop works
 
-### Customer flow
-1. Log in → go to `/shop` → browse all active products in a grid
-2. Click **"Add to Cart"** on any product (available on the catalogue and the product detail page)
-3. The cart is stored in the **Flask session** (server-side — no extra database table needed)
-4. Go to `/cart` → see all items, quantities, and the running subtotal
-5. Click **"Checkout"** → the server creates a Stripe Checkout Session and redirects to Stripe's hosted payment page
-6. On Stripe's page: enter card details and pay
-7. Stripe redirects back to `/checkout/success?session_id=...`
-8. The server asks Stripe "was this actually paid?" — if yes, saves the Order and OrderItems to the database and clears the cart
-9. User sees a success page with their full order summary
-10. All past orders are visible at `/orders`
+### Cart design
+The cart lives in the Flask session as a plain dictionary:
+```python
+session['cart'] = {'1': 2, '3': 1}  # product_id (as string): quantity
+```
+- String keys because session data is serialised to JSON, which only allows string keys.
+- `session.modified = True` must be set after mutating a dict in the session, so Flask knows to re-sign and re-save the cookie.
+- The cart clears when the user logs out (`session.clear()`) or the session expires.
 
-### Cart design decision
-The cart lives in the session rather than the database. This keeps it simple — no cleanup jobs needed for abandoned carts. The trade-off is that the cart clears if the user logs out or their session expires. For a production app you could persist the cart to the database to survive logouts.
+### Customer flow
+1. `/shop` — queries `Product.query.filter_by(is_active=True)` — only shows live products
+2. Click "Add to Cart" → POST `/cart/add/<id>` — increments `session['cart'][str(id)]`
+3. `/cart` — loads each product from DB, calculates line totals and subtotal
+4. "Checkout" → POST `/checkout/create` — builds Stripe `line_items` from the cart and calls `stripe.checkout.Session.create()`
+5. Stripe redirects user to its hosted payment page
+6. After payment: Stripe redirects to `/checkout/success?session_id=...`
+7. Server calls `stripe.checkout.Session.retrieve(session_id)` to **verify** the payment status with Stripe directly
+8. Idempotency check: `Order.query.filter_by(stripe_checkout_session_id=session_id).first()` — if this session has already been processed, the existing order is shown instead of creating a duplicate
+9. New `Order` row (status `'paid'`) + `OrderItem` rows saved to DB; cart cleared from session
+
+### Price in pence
+All prices are stored as integers in pence (£9.99 → `999`) to avoid floating-point rounding errors. The admin enters pounds (e.g. `9.99`), the route converts it: `int(round(float(price_str) * 100))`.
 
 ---
 
 ## How admin product management works
 
-**Accessing it:** Log in as an admin → go to `/admin/products`. This route is protected — non-admins are redirected away.
+**Access:** `/admin/products` — protected by `@login_required` + `_admin_only()`.
 
-**What admins can do and what happens in the database:**
+| Action | Route | What happens in the DB |
+|--------|-------|------------------------|
+| View all products | GET `/admin/products` | `SELECT * FROM products ORDER BY created_at DESC` |
+| Add a product | GET/POST `/admin/products/new` | `INSERT` into `products` |
+| Edit a product | GET/POST `/admin/products/<id>/edit` | `UPDATE` the `products` row |
+| Delete a product | POST `/admin/products/<id>/delete` | `DELETE` the row |
 
-| Action | URL | What happens in the DB |
-|--------|-----|------------------------|
-| View all products | `/admin/products` | `SELECT * FROM products ORDER BY created_at DESC` |
-| Add a new product | `/admin/products/new` | `INSERT` a new row into `products` |
-| Edit a product | `/admin/products/<id>/edit` | `UPDATE` the existing `products` row |
-| Delete a product | `/admin/products/<id>/delete` | `DELETE` the row from `products` |
+**Delete uses POST (not GET)** — this prevents accidental deletion by simply visiting a URL (e.g. a prefetch or link click).
+
+**image_url** is optional — the field is `nullable=True` in the model. If the admin leaves it blank, the form stores `None` (via `request.form.get('image_url', '').strip() or None`). Templates show a default icon when `image_url` is `None`.
 
 **Deactivating vs deleting:**
-Unchecking "Active" when editing sets `is_active = False`. The product disappears from the customer shop (which filters `WHERE is_active = TRUE`) but the database row is kept. This is the **safe option** for products that have been ordered — past `order_items` rows still reference the product correctly.
+- Unchecking "Active" sets `is_active=False`. The product disappears from `/shop` (which filters `WHERE is_active=True`) but the DB row is kept. Past `order_items` still reference it correctly.
+- Deleting removes the row entirely. Only safe for products that have **never been ordered**. If `order_items` rows reference the product, the `/orders` page will error trying to join to a missing row.
 
-Deleting a product removes the row entirely. Only do this for products that have **never been ordered**. If orders exist for that product, the `order_items.product_id` foreign key will point to a missing row, which will cause errors on the orders page.
-
-**Price changes:** Editing a product's price only affects future purchases. Past `order_items` rows store a `unit_price` snapshot (the price at the time of purchase), so historical orders always show the correct amount — even if the product price changes later.
-
-**Making yourself an admin:** Open `app.db` with a SQLite browser (e.g. [DB Browser for SQLite](https://sqlitebrowser.org/)) and change the `role` column from `'user'` to `'admin'` for your account row. Or run this one-liner:
-```
-python -c "from app import app; from models import db, User; app.app_context().push(); u = User.query.filter_by(email='you@example.com').first(); u.role='admin'; db.session.commit(); print('Done')"
-```
+**Price changes:** Editing a product's price only affects future purchases. Past `order_items` rows store a `unit_price` snapshot (the price at time of purchase), so historical order totals are always accurate.
 
 ---
 
 ## The database
 
-**Type:** SQLite — a single file called `app.db` stored in the project folder. No separate database server needed.
+**Type:** SQLite — a single file (`app.db`) in the project folder. No separate server needed. Created automatically by `db.create_all()` when the app starts.
 
-**ORM:** SQLAlchemy — lets us work with Python objects instead of writing raw SQL.
+**ORM:** SQLAlchemy — maps Python classes to database tables. `db.session.add()`, `db.session.commit()`, `db.session.delete()` replace writing raw SQL.
 
-### `users` table (one row per registered user)
+### `users` table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `user_id` | Integer | Auto-incrementing unique ID |
-| `full_name` | String | First + last name combined |
-| `email` | String | Unique, used to log in |
-| `password_hash` | String | Hashed password (never the real one) |
-| `role` | String | `'user'` or `'admin'` |
-| `join_date` | DateTime | Set automatically when account is created |
-| `is_verified` | Boolean | `False` until they click the email link |
+| Column | Type | Notes |
+|--------|------|-------|
+| `user_id` | Integer PK | Auto-incremented |
+| `full_name` | String(120) | First + last stored together |
+| `email` | String(120) unique | Lowercased before storage |
+| `password_hash` | String(256) | PBKDF2-SHA256 hash — never the real password |
+| `role` | String(20) | `'user'` (default) or `'admin'` |
+| `join_date` | DateTime | Auto-set to `datetime.utcnow` on creation |
+| `is_verified` | Boolean | `False` until verification email clicked |
 
-### `products` table (one row per product in the shop)
+### `products` table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Integer | Auto-incrementing primary key |
-| `name` | String | Product name shown in the shop |
-| `description` | Text | Full product description |
-| `price` | Integer | Price in **pence** (e.g. `999` = £9.99) — stored as an integer to avoid floating-point rounding errors |
-| `image_url` | String | Optional URL to a product image; leave blank for a default icon |
-| `is_active` | Boolean | `True` = visible to customers; `False` = hidden from shop but kept in DB |
-| `created_at` | DateTime | Set automatically when the product is created |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | Integer PK | Auto-incremented |
+| `name` | String(120) | Shown in shop |
+| `description` | Text | Full description |
+| `price` | Integer | In pence — e.g. `999` = £9.99 |
+| `image_url` | String(300) nullable | Optional; `None` → default icon |
+| `is_active` | Boolean | `True` = visible in shop |
+| `created_at` | DateTime | Auto-set on creation |
 
-### `orders` table (one row per completed checkout)
+### `orders` table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Integer | Auto-incrementing primary key |
-| `user_id` | Integer | Foreign key → `users.user_id` (who placed the order) |
-| `stripe_checkout_session_id` | String | Stripe's unique session ID — used to verify payment and prevent double-processing |
-| `amount_total` | Integer | Total amount paid in pence |
-| `status` | String | `'pending'` when created; `'paid'` after Stripe confirms; `'failed'` on error |
-| `created_at` | DateTime | Set automatically when the order is created |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | Integer PK | Auto-incremented |
+| `user_id` | Integer FK → `users.user_id` | Who placed the order |
+| `stripe_checkout_session_id` | String(200) unique | Used for idempotency check + Stripe lookup |
+| `amount_total` | Integer | Total paid in pence |
+| `status` | String(20) | `'pending'` → `'paid'` or `'failed'` |
+| `created_at` | DateTime | Auto-set on creation |
 
-### `order_items` table (one row per product line within an order)
+### `order_items` table
 
-| Column | Type | Description |
-|--------|------|-------------|
-| `id` | Integer | Auto-incrementing primary key |
-| `order_id` | Integer | Foreign key → `orders.id` |
-| `product_id` | Integer | Foreign key → `products.id` |
-| `quantity` | Integer | How many of this product were bought |
-| `unit_price` | Integer | Price **at time of purchase** in pence — a snapshot so historical orders stay accurate even if the product's price is later changed |
+| Column | Type | Notes |
+|--------|------|-------|
+| `id` | Integer PK | Auto-incremented |
+| `order_id` | Integer FK → `orders.id` | Which order this belongs to |
+| `product_id` | Integer FK → `products.id` | Which product |
+| `quantity` | Integer | How many bought |
+| `unit_price` | Integer | **Price snapshot at time of purchase** — independent of current product price |
 
 ---
 
 ## Stripe integration
 
-### Setting up Stripe
-1. Create a free account at [stripe.com](https://stripe.com)
-2. In the Stripe dashboard, make sure you're in **Test mode** (toggle in the top-left corner)
-3. Go to **Developers → API keys**
-4. Copy the **Publishable key** (`pk_test_...`) and **Secret key** (`sk_test_...`)
-5. Add both to your `.env` file (see the "How to run" section below)
+### How payment verification works
+1. The server creates a Stripe Checkout Session (server-side with `stripe.api_key = secret_key`).
+2. The user is redirected to Stripe's hosted page (Stripe handles card data — our server never sees card numbers).
+3. After payment, Stripe redirects to `/checkout/success?session_id=cs_...`.
+4. The server calls `stripe.checkout.Session.retrieve(session_id)` to ask Stripe directly: was this actually paid?
+5. Only if `checkout_session.payment_status == 'paid'` does the server write the order to the DB.
 
-The **secret key** is used server-side only and must never be exposed in HTML or JavaScript. The **publishable key** is safe to include in frontend code if needed.
+### Idempotency
+Before writing an order, the route checks:
+```python
+existing = Order.query.filter_by(stripe_checkout_session_id=session_id).first()
+```
+If an order with that session ID already exists (e.g. user refreshed the success page), the existing order is returned instead of creating a duplicate.
 
-### Test card (no real money charged)
-Use these details on Stripe's test payment page:
-
+### Test card
 ```
 Card number:  4242 4242 4242 4242
-Expiry:       Any future date  (e.g. 12/29)
-CVC:          Any 3 digits     (e.g. 123)
+Expiry:       Any future date (e.g. 12/29)
+CVC:          Any 3 digits (e.g. 123)
 ```
+Other test cards:
+- `4000 0025 0000 3155` — triggers 3D Secure
+- `4000 0000 0000 9995` — always declines
 
-Other useful test cards:
-- `4000 0025 0000 3155` — triggers a 3D Secure authentication challenge
-- `4000 0000 0000 9995` — always declines (useful for testing error handling)
-
-### Going live
-When you're ready to accept real payments:
-1. Switch Stripe to **Live mode** in the dashboard
-2. Copy your live keys (`sk_live_...`, `pk_live_...`)
-3. Replace the test keys in your `.env` file with the live keys
-4. **No code changes needed** — the app works identically in both modes
-
-### Changing currency
-The app currently charges in GBP. To switch, find `'currency': 'gbp'` in `shop/routes.py` and change it to any lowercase [ISO 4217 currency code](https://en.wikipedia.org/wiki/ISO_4217) (e.g. `'usd'`, `'eur'`, `'aud'`).
+### Currency
+Hardcoded to GBP. To change, find `'currency': 'gbp'` in `shop/routes.py` and replace with any ISO 4217 code (e.g. `'usd'`, `'eur'`).
 
 ---
 
-## How to run the project
-
-### 1. Install dependencies
-```
-pip install -r requirements.txt
-```
-
-### 2. Create your `.env` file
-Create a file called `.env` in the project folder (same place as `app.py`):
-```
-SECRET_KEY=any-long-random-string-you-choose
-GMAIL_ADDRESS=youremail@gmail.com
-GMAIL_APP_PASSWORD=xxxx-xxxx-xxxx-xxxx
-STRIPE_SECRET_KEY=sk_test_...
-STRIPE_PUBLISHABLE_KEY=pk_test_...
-```
-
-**Gmail App Password:**
-1. Enable 2-Step Verification on your Google account
-2. Go to [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords)
-3. Create a new app password and paste it above
-
-**Stripe keys:** See the "Stripe integration" section above.
-
-### 3. Run the app
-```
-python app.py
-```
-
-### 4. Open in browser
-Visit: http://127.0.0.1:5000/register
-
----
-
-## Key technologies used
+## Key technologies
 
 | Package | What it does |
 |---------|-------------|
-| Flask | The web framework — handles routing, templates, sessions |
-| Flask-WTF | Adds CSRF protection and integrates WTForms with Flask |
+| Flask | Web framework — handles routing, templates, sessions |
+| Flask-WTF | Adds CSRF protection; integrates WTForms with Flask |
 | WTForms | Defines and validates form fields |
-| Flask-SQLAlchemy | Connects Flask to a database using Python objects |
+| Flask-SQLAlchemy | Connects Flask to a database using Python objects (ORM) |
 | Flask-Limiter | Rate limits routes by IP address |
 | Flask-Mail | Sends emails via Gmail SMTP |
-| Werkzeug | Provides password hashing (comes with Flask) |
-| itsdangerous | Creates signed, expiring tokens for email links |
-| python-dotenv | Loads `.env` file into environment variables at startup |
-| stripe | Processes payments via Stripe Checkout (hosted payment page) |
+| Werkzeug | Provides `generate_password_hash` / `check_password_hash` (comes with Flask) |
+| itsdangerous | Creates signed, time-limited tokens for email links (`URLSafeTimedSerializer`) |
+| python-dotenv | Loads `.env` file into `os.environ` at startup |
+| stripe | Creates payment sessions and verifies payments via the Stripe API |
+| re (stdlib) | Python's built-in regex module — used for email and password validation |
