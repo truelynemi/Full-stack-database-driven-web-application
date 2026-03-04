@@ -2,18 +2,21 @@
    GLOBAL STYLES & RESET
    ======================================== */
 
+/* Universal box-sizing and margin/padding reset */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* Base body font stack, line height, and default text colour */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
     color: #374151;
 }
 
+/* Full-height page wrapper with a very light red-tinted background */
 .page-container {
     min-height: 100vh;
     background-color: #fdf5f5;
@@ -23,18 +26,21 @@ body {
    HERO SECTION  —  red scheme
    ======================================== */
 
+/* Red-tinted hero banner at the top of the Terms page */
 .hero-section {
     position: relative;
     background-color: rgba(153, 27, 27, 0.12);
     padding: 64px 16px;
 }
 
+/* Diagonal red gradient overlay for depth on the hero background */
 .hero-overlay {
     position: absolute;
     inset: 0;
     background: linear-gradient(to right, rgba(127, 29, 29, 0.18), rgba(220, 38, 38, 0.12));
 }
 
+/* Centred content wrapper inside the hero, sits above the overlay */
 .hero-content {
     position: relative;
     max-width: 1280px;
@@ -42,16 +48,19 @@ body {
     text-align: center;
 }
 
+/* Flex container that centres the icon horizontally above the title */
 .hero-icon-wrapper {
     display: flex;
     justify-content: center;
     margin-bottom: 24px;
 }
 
+/* Dark red colour applied to the hero icon SVG */
 .hero-icon {
     color: #991b1b;
 }
 
+/* Large bold page title in dark red */
 .hero-title {
     font-size: 3rem;
     color: #7f1d1d;
@@ -59,6 +68,7 @@ body {
     font-weight: 700;
 }
 
+/* Subtitle paragraph below the title, capped to a readable width */
 .hero-description {
     font-size: 1.25rem;
     color: #4b5563;
@@ -67,6 +77,7 @@ body {
     line-height: 1.75;
 }
 
+/* "Last updated" date in muted grey below the description */
 .hero-date {
     color: #6b7280;
     font-size: 1rem;
@@ -76,12 +87,14 @@ body {
    PAGE LAYOUT (sidebar + content)
    ======================================== */
 
+/* Outer wrapper that constrains the page to 1280 px and adds vertical padding */
 .content-wrapper {
     max-width: 1280px;
     margin: 0 auto;
     padding: 48px 16px;
 }
 
+/* Two-column layout: sticky sidebar on the left, content on the right */
 .page-layout {
     display: flex;
     gap: 32px;
@@ -92,6 +105,7 @@ body {
    QUICK NAVIGATION SIDEBAR  —  red accents
    ======================================== */
 
+/* Sticky sidebar panel with red-tinted border that follows the user as they scroll */
 .sidebar-nav {
     width: 220px;
     flex-shrink: 0;
@@ -106,6 +120,7 @@ body {
     overflow-y: auto;
 }
 
+/* "Quick Navigation" label at the top of the sidebar in small-caps grey */
 .sidebar-nav-title {
     font-size: 0.75rem;
     font-weight: 700;
@@ -117,12 +132,14 @@ body {
     margin-bottom: 8px;
 }
 
+/* Removes the default bullet points and padding from the nav list */
 .sidebar-nav-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
+/* Each sidebar link — full-width block with a left-border accent placeholder */
 .sidebar-nav-list li a {
     display: block;
     padding: 7px 20px;
@@ -134,12 +151,14 @@ body {
     line-height: 1.4;
 }
 
+/* Hover state: red accent colour, light red background, and coloured left border */
 .sidebar-nav-list li a:hover {
     color: #dc2626;
     background-color: #fff5f5;
     border-left-color: #dc2626;
 }
 
+/* Active section highlight — same look as hover but persists while section is in view */
 .sidebar-nav-list li a.active {
     color: #dc2626;
     background-color: #fff5f5;
@@ -147,7 +166,7 @@ body {
     font-weight: 600;
 }
 
-/* Mobile quick nav strip */
+/* Mobile quick nav strip — shown only on small screens instead of the sidebar */
 .mobile-quick-nav {
     display: none;
     overflow-x: auto;
@@ -161,6 +180,7 @@ body {
     scrollbar-width: thin;
 }
 
+/* Individual pill-shaped nav links inside the mobile horizontal strip */
 .mobile-quick-nav a {
     display: inline-block;
     margin-right: 10px;
@@ -173,6 +193,7 @@ body {
     transition: background-color 0.2s, color 0.2s;
 }
 
+/* Hover state for mobile nav pills — deeper red tint */
 .mobile-quick-nav a:hover {
     background-color: #fee2e2;
     color: #dc2626;
@@ -182,15 +203,18 @@ body {
    MAIN CONTENT AREA
    ======================================== */
 
+/* Flexible column that grows to fill the space beside the sidebar */
 .main-content {
     flex: 1;
     min-width: 0;
 }
 
+/* Caps the prose content to a comfortable reading width */
 .content-container {
     max-width: 896px;
 }
 
+/* White card with red-tinted border that wraps all policy sections */
 .content-card {
     background-color: white;
     border-radius: 8px;
@@ -203,15 +227,18 @@ body {
    SECTION STYLES
    ======================================== */
 
+/* Each policy section block; scroll-margin-top offsets for the sticky navbar */
 .section {
     margin-bottom: 48px;
     scroll-margin-top: 100px;
 }
 
+/* Removes the bottom margin after the very last section in the card */
 .section:last-child {
     margin-bottom: 0;
 }
 
+/* Row containing the accent icon and the h2 section title */
 .section-header {
     display: flex;
     align-items: center;
@@ -219,39 +246,47 @@ body {
     margin-bottom: 24px;
 }
 
+/* Red accent icon that sits beside each section heading */
 .section-icon {
     color: #dc2626;
     flex-shrink: 0;
 }
 
+/* Section heading text — large, bold, near-black */
 .section-header h2 {
     color: #111827;
     font-size: 1.875rem;
     font-weight: 700;
 }
 
+/* Body text wrapper for each section's paragraph content */
 .section-content {
     color: #4b5563;
 }
 
+/* Bottom margin between consecutive paragraphs */
 .section-content p {
     margin-bottom: 16px;
 }
 
+/* Removes the trailing margin after the final paragraph in a section */
 .section-content p:last-child {
     margin-bottom: 0;
 }
 
+/* Bulleted list inside section body text */
 .section-content ul {
     list-style-type: disc;
     padding-left: 24px;
     margin: 16px 0;
 }
 
+/* Vertical spacing between individual list items */
 .section-content ul li {
     margin-bottom: 8px;
 }
 
+/* Slightly darker bold text for inline emphasis within paragraphs */
 .section-content strong {
     font-weight: 600;
     color: #374151;
@@ -269,6 +304,7 @@ body {
    CONTACT BOX
    ======================================== */
 
+/* Light red highlighted box with a bold red left border for contact details */
 .contact-box {
     background-color: #fef2f2;
     border-radius: 8px;
@@ -277,10 +313,12 @@ body {
     margin: 16px 0;
 }
 
+/* Spacing between paragraphs inside the contact box */
 .contact-box p {
     margin-bottom: 12px;
 }
 
+/* No trailing margin after the last paragraph in the contact box */
 .contact-box p:last-child {
     margin-bottom: 0;
 }
@@ -289,6 +327,7 @@ body {
    SEPARATOR
    ======================================== */
 
+/* Thin red-tinted horizontal rule used to divide content blocks */
 .separator {
     border: none;
     border-top: 1px solid #fee2e2;
@@ -299,6 +338,7 @@ body {
    SCROLL TO TOP BUTTON  —  red
    ======================================== */
 
+/* Fixed "back to top" button pinned to the bottom-right corner; hidden by default */
 .scroll-top-btn {
     position: fixed;
     bottom: 24px;
@@ -320,11 +360,13 @@ body {
     z-index: 50;
 }
 
+/* Slight upward lift on hover with a deeper red shadow */
 .scroll-top-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 20px 25px -5px rgba(220, 38, 38, 0.35);
 }
 
+/* JS adds this class once the user scrolls past the hero to reveal the button */
 .scroll-top-btn.visible {
     opacity: 1;
     visibility: visible;
@@ -334,12 +376,14 @@ body {
    ACCESSIBILITY
    ======================================== */
 
+/* Visible red focus ring for keyboard navigation */
 button:focus,
 a:focus {
     outline: 2px solid #dc2626;
     outline-offset: 2px;
 }
 
+/* Disable CSS transitions for users who have requested reduced motion */
 @media (prefers-reduced-motion: reduce) {
     .scroll-top-btn,
     .sidebar-nav-list li a,
@@ -353,18 +397,23 @@ a:focus {
    ======================================== */
 
 @media (min-width: 1280px) {
+    /* More generous hero padding on wide screens */
     .hero-section {
         padding: 96px 24px;
     }
+    /* Bump up the hero title size on large screens */
     .hero-title {
         font-size: 3.5rem;
     }
+    /* Slightly larger description text on large screens */
     .hero-description {
         font-size: 1.375rem;
     }
+    /* Extra padding inside the content card on large screens */
     .content-card {
         padding: 64px;
     }
+    /* Larger h2 headings on large screens */
     .section-header h2 {
         font-size: 2rem;
     }
@@ -375,12 +424,15 @@ a:focus {
    ======================================== */
 
 @media (max-width: 1024px) {
+    /* Reduce card padding on tablet-sized viewports */
     .content-card {
         padding: 32px;
     }
+    /* Shrink the hero title slightly on tablets */
     .hero-title {
         font-size: 2.5rem;
     }
+    /* Narrow the sidebar slightly to give content more room */
     .sidebar-nav {
         width: 190px;
     }
@@ -391,34 +443,44 @@ a:focus {
    ======================================== */
 
 @media (max-width: 768px) {
+    /* Reduce hero padding on small tablets */
     .hero-section {
         padding: 48px 16px;
     }
+    /* Smaller hero title */
     .hero-title {
         font-size: 2rem;
     }
+    /* Smaller description text */
     .hero-description {
         font-size: 1.125rem;
     }
+    /* Tighter vertical padding for the content wrapper */
     .content-wrapper {
         padding: 32px 16px;
     }
+    /* Less card padding at this breakpoint */
     .content-card {
         padding: 24px;
     }
+    /* Smaller h2 on small tablets */
     .section-header h2 {
         font-size: 1.5rem;
     }
+    /* Stack layout to single column */
     .page-layout {
         flex-direction: column;
         gap: 0;
     }
+    /* Hide the desktop sidebar — replaced by the mobile nav strip */
     .sidebar-nav {
         display: none;
     }
+    /* Show the horizontal scrolling mobile nav strip instead */
     .mobile-quick-nav {
         display: block;
     }
+    /* Content column takes full width when sidebar is hidden */
     .main-content {
         width: 100%;
     }
@@ -429,15 +491,19 @@ a:focus {
    ======================================== */
 
 @media (max-width: 640px) {
+    /* Smaller hero title on phones */
     .hero-title {
         font-size: 1.75rem;
     }
+    /* Compact description text on phones */
     .hero-description {
         font-size: 1rem;
     }
+    /* Less padding inside the card on small phones */
     .content-card {
         padding: 20px;
     }
+    /* Move the scroll-to-top button inward so it doesn't clip the screen edge */
     .scroll-top-btn {
         bottom: 16px;
         right: 16px;
@@ -451,44 +517,56 @@ a:focus {
    ======================================== */
 
 @media (max-width: 480px) {
+    /* Minimal hero padding on very small screens */
     .hero-section {
         padding: 32px 12px;
     }
+    /* Compact hero title for very small screens */
     .hero-title {
         font-size: 1.5rem;
         margin-bottom: 16px;
     }
+    /* Tight description font size for very small screens */
     .hero-description {
         font-size: 0.9375rem;
         line-height: 1.6;
     }
+    /* Tighter page padding on very small screens */
     .content-wrapper {
         padding: 24px 12px;
     }
+    /* Minimal card padding and slightly smaller border radius */
     .content-card {
         padding: 16px;
         border-radius: 6px;
     }
+    /* Tighter section header gap and spacing */
     .section-header {
         gap: 8px;
         margin-bottom: 16px;
     }
+    /* Smallest h2 size for very small screens */
     .section-header h2 {
         font-size: 1.25rem;
     }
+    /* Shrink the section icon slightly */
     .section-icon {
         width: 20px;
         height: 20px;
     }
+    /* Less space between sections on very small screens */
     .section {
         margin-bottom: 32px;
     }
+    /* Less margin around the separator on very small screens */
     .separator {
         margin: 24px 0;
     }
+    /* Less padding inside the contact box on very small screens */
     .contact-box {
         padding: 16px;
     }
+    /* Shrink and reposition the scroll-to-top button on very small screens */
     .scroll-top-btn {
         bottom: 12px;
         right: 12px;
@@ -502,37 +580,46 @@ a:focus {
    ======================================== */
 
 @media print {
+    /* White background removes the red tint when printing */
     .page-container {
         background-color: white;
     }
+    /* Collapse hero padding and remove background for print */
     .hero-section {
         background-color: white;
         padding: 24px 0;
     }
+    /* Hide the decorative gradient overlay in print */
     .hero-overlay {
         display: none;
     }
+    /* Black title and icon colour for print readability */
     .hero-title,
     .hero-icon {
         color: #111827;
     }
+    /* Dark grey for description and date in print */
     .hero-description,
     .hero-date {
         color: #374151;
     }
+    /* Remove box shadow and reduce padding for the printed card */
     .content-card {
         box-shadow: none;
         border: 1px solid #e5e7eb;
         padding: 24px;
     }
+    /* Hide UI chrome that makes no sense in print */
     .sidebar-nav,
     .mobile-quick-nav,
     .scroll-top-btn {
         display: none;
     }
+    /* Switch layout to single-column for print */
     .page-layout {
         display: block;
     }
+    /* Prevent section headings from being orphaned at the bottom of a page */
     .section {
         page-break-inside: avoid;
     }

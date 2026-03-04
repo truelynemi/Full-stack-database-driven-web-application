@@ -2,12 +2,15 @@
    GLOBAL STYLES & RESET
    ======================================== */
 
+/* Remove default margin/padding on every element; use border-box so padding
+   is included inside an element's stated width rather than added on top */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
+/* System font stack for a native feel; comfortable line-height for readability */
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     line-height: 1.6;
@@ -19,6 +22,7 @@ body {
    NAVBAR
    ======================================== */
 
+/* Dark navy bar pinned to the top; flexbox keeps brand left, links right */
 .navbar {
     background-color: #1e3a5f;
     padding: 14px 24px;
@@ -27,6 +31,7 @@ body {
     align-items: center;
 }
 
+/* Site name/logo link — white, bold, no underline */
 .navbar-brand {
     color: white;
     font-weight: 700;
@@ -34,6 +39,7 @@ body {
     text-decoration: none;
 }
 
+/* Horizontal list of nav links — gap instead of margins for even spacing */
 .navbar-links {
     display: flex;
     gap: 20px;
@@ -41,6 +47,7 @@ body {
     list-style: none;
 }
 
+/* Individual nav link — muted white with smooth colour transition */
 .navbar-links a {
     color: #cbd5e1;
     text-decoration: none;
@@ -48,10 +55,13 @@ body {
     transition: color 0.2s;
 }
 
+/* Brighten to pure white when hovered */
 .navbar-links a:hover {
     color: white;
 }
 
+/* Cart button — stands out with a blue pill background and flex layout
+   for the icon, text, and badge to sit inline */
 .cart-link {
     position: relative;
     display: inline-flex;
@@ -65,17 +75,19 @@ body {
     transition: background-color 0.2s !important;
 }
 
+/* Darker blue on hover */
 .cart-link:hover {
     background-color: #1d4ed8 !important;
 }
 
+/* Red circle showing the number of items in the cart */
 .cart-badge {
     background-color: #ef4444;
     color: white;
     font-size: 0.6875rem;
     font-weight: 700;
     padding: 2px 6px;
-    border-radius: 9999px;
+    border-radius: 9999px; /* pill shape */
     line-height: 1;
     min-width: 18px;
     text-align: center;
@@ -85,6 +97,7 @@ body {
    PAGE HEADER / HERO
    ======================================== */
 
+/* Full-width gradient banner at the top of shop pages */
 .page-header {
     background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
     padding: 48px 24px;
@@ -92,12 +105,14 @@ body {
     color: white;
 }
 
+/* Large white heading inside the banner */
 .page-header h1 {
     font-size: 2.25rem;
     font-weight: 700;
     margin-bottom: 8px;
 }
 
+/* Slightly transparent subtitle under the heading */
 .page-header p {
     font-size: 1.0625rem;
     color: rgba(255,255,255,0.8);
@@ -107,12 +122,14 @@ body {
    FLASH MESSAGES
    ======================================== */
 
+/* Constrains flash messages to the same max-width as the rest of the page */
 .flash-container {
     max-width: 1200px;
     margin: 20px auto 0;
     padding: 0 24px;
 }
 
+/* Base flash message box — rounded, with consistent padding */
 .flash {
     padding: 12px 16px;
     border-radius: 6px;
@@ -120,6 +137,7 @@ body {
     font-size: 0.9375rem;
 }
 
+/* Colour variants — green for success, red for danger, amber for warning, blue for info */
 .flash.success { background-color: #d1fae5; color: #065f46; border-left: 4px solid #10b981; }
 .flash.danger  { background-color: #fee2e2; color: #991b1b; border-left: 4px solid #ef4444; }
 .flash.warning { background-color: #fef3c7; color: #92400e; border-left: 4px solid #f59e0b; }
@@ -129,6 +147,7 @@ body {
    MAIN CONTAINER
    ======================================== */
 
+/* Centered page wrapper with a max-width so content doesn't stretch too wide on large screens */
 .container {
     max-width: 1200px;
     margin: 40px auto;
@@ -139,12 +158,14 @@ body {
    PRODUCT GRID (catalogue)
    ======================================== */
 
+/* Responsive grid — cards fill as many columns as fit at min 260px each */
 .product-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 24px;
 }
 
+/* Individual product card — white box with subtle shadow and border */
 .product-card {
     background-color: white;
     border-radius: 10px;
@@ -156,11 +177,13 @@ body {
     transition: box-shadow 0.2s, transform 0.2s;
 }
 
+/* Lift the card slightly and deepen the shadow when hovered */
 .product-card:hover {
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
     transform: translateY(-2px);
 }
 
+/* Product image — fixed height, cropped to cover the space */
 .product-card-img {
     width: 100%;
     height: 200px;
@@ -168,6 +191,7 @@ body {
     background-color: #f3f4f6;
 }
 
+/* Grey gradient placeholder shown when no image URL is provided */
 .product-card-img-placeholder {
     width: 100%;
     height: 200px;
@@ -179,6 +203,7 @@ body {
     font-size: 3rem;
 }
 
+/* Padding area below the image; flex column so footer sticks to the bottom */
 .product-card-body {
     padding: 20px;
     flex: 1;
@@ -186,6 +211,7 @@ body {
     flex-direction: column;
 }
 
+/* Product name — dark, bold */
 .product-card-name {
     font-size: 1.0625rem;
     font-weight: 700;
@@ -193,6 +219,7 @@ body {
     margin-bottom: 8px;
 }
 
+/* Description — clamped to 3 lines to keep cards the same height */
 .product-card-desc {
     font-size: 0.875rem;
     color: #6b7280;
@@ -204,6 +231,7 @@ body {
     overflow: hidden;
 }
 
+/* Row at the bottom of the card with price on the left and buttons on the right */
 .product-card-footer {
     display: flex;
     align-items: center;
@@ -211,6 +239,7 @@ body {
     gap: 8px;
 }
 
+/* Price text — large, dark navy */
 .product-price {
     font-size: 1.25rem;
     font-weight: 700;
@@ -221,6 +250,7 @@ body {
    BUTTONS
    ======================================== */
 
+/* Base button — flexbox for icon+text, rounded corners, no browser default border */
 .btn {
     display: inline-flex;
     align-items: center;
@@ -235,10 +265,12 @@ body {
     transition: background-color 0.2s, transform 0.1s;
 }
 
+/* Slight press effect when the button is clicked */
 .btn:active {
     transform: scale(0.98);
 }
 
+/* Primary action — solid blue */
 .btn-primary {
     background-color: #2563eb;
     color: white;
@@ -248,6 +280,7 @@ body {
     background-color: #1d4ed8;
 }
 
+/* Secondary action — light grey with a border */
 .btn-secondary {
     background-color: #f3f4f6;
     color: #374151;
@@ -258,6 +291,7 @@ body {
     background-color: #e5e7eb;
 }
 
+/* Positive/confirm action — green (used for the Checkout button) */
 .btn-success {
     background-color: #059669;
     color: white;
@@ -267,6 +301,7 @@ body {
     background-color: #047857;
 }
 
+/* Destructive action — red (used for Remove and Delete) */
 .btn-danger {
     background-color: #ef4444;
     color: white;
@@ -276,11 +311,13 @@ body {
     background-color: #dc2626;
 }
 
+/* Compact button for use inside tables */
 .btn-sm {
     padding: 6px 12px;
     font-size: 0.8125rem;
 }
 
+/* Larger button for prominent CTAs like Checkout */
 .btn-lg {
     padding: 12px 28px;
     font-size: 1rem;
@@ -290,6 +327,7 @@ body {
    PRODUCT DETAIL PAGE
    ======================================== */
 
+/* Two-column grid — image on the left, info on the right */
 .product-detail {
     background-color: white;
     border-radius: 10px;
@@ -301,6 +339,7 @@ body {
     gap: 0;
 }
 
+/* Left panel that contains the product image */
 .product-detail-img-wrap {
     background-color: #f3f4f6;
     min-height: 380px;
@@ -309,6 +348,7 @@ body {
     justify-content: center;
 }
 
+/* Image fills its panel, cropped if needed */
 .product-detail-img-wrap img {
     width: 100%;
     height: 100%;
@@ -316,11 +356,13 @@ body {
     min-height: 380px;
 }
 
+/* Large emoji shown when no image is available */
 .product-detail-img-placeholder {
     font-size: 6rem;
     color: #9ca3af;
 }
 
+/* Right panel containing name, price, description, and Add to Cart button */
 .product-detail-info {
     padding: 40px;
     display: flex;
@@ -328,6 +370,7 @@ body {
     justify-content: center;
 }
 
+/* Product name heading on the detail page */
 .product-detail-name {
     font-size: 1.875rem;
     font-weight: 700;
@@ -335,6 +378,7 @@ body {
     margin-bottom: 16px;
 }
 
+/* Price shown in blue — larger than the catalogue card price */
 .product-detail-price {
     font-size: 2rem;
     font-weight: 700;
@@ -342,6 +386,7 @@ body {
     margin-bottom: 24px;
 }
 
+/* Full product description with generous line-height */
 .product-detail-desc {
     color: #4b5563;
     margin-bottom: 32px;
@@ -352,6 +397,7 @@ body {
    CART TABLE
    ======================================== */
 
+/* White card wrapping the entire cart table */
 .cart-card {
     background-color: white;
     border-radius: 10px;
@@ -360,11 +406,13 @@ body {
     overflow: hidden;
 }
 
+/* Cart table fills the full width of its card */
 .cart-table {
     width: 100%;
     border-collapse: collapse;
 }
 
+/* Uppercase grey column headers with a light background */
 .cart-table th {
     padding: 14px 20px;
     text-align: left;
@@ -377,25 +425,30 @@ body {
     border-bottom: 1px solid #e5e7eb;
 }
 
+/* Standard cell padding; vertically centred content */
 .cart-table td {
     padding: 16px 20px;
     border-bottom: 1px solid #f3f4f6;
     vertical-align: middle;
 }
 
+/* Remove the divider line below the last row */
 .cart-table tr:last-child td {
     border-bottom: none;
 }
 
+/* Product name link inside the cart — bold, dark */
 .cart-product-name {
     font-weight: 600;
     color: #111827;
 }
 
+/* Subtotal row gets a light grey background to visually separate it */
 .cart-subtotal-row {
     background-color: #f9fafb;
 }
 
+/* Bold subtotal amount with a heavier top border */
 .cart-subtotal-row td {
     padding: 16px 20px;
     font-weight: 700;
@@ -403,6 +456,7 @@ body {
     border-top: 2px solid #e5e7eb;
 }
 
+/* Row below the table containing Continue Shopping and Checkout buttons */
 .cart-actions {
     padding: 20px;
     display: flex;
@@ -415,17 +469,20 @@ body {
    EMPTY STATE
    ======================================== */
 
+/* Centered placeholder shown when a list has no items (empty cart, no products, etc.) */
 .empty-state {
     text-align: center;
     padding: 80px 24px;
 }
 
+/* Large faded icon above the message */
 .empty-state-icon {
     font-size: 4rem;
     margin-bottom: 16px;
     opacity: 0.4;
 }
 
+/* "Nothing here yet" heading */
 .empty-state h2 {
     font-size: 1.5rem;
     font-weight: 700;
@@ -433,6 +490,7 @@ body {
     margin-bottom: 8px;
 }
 
+/* Supporting description text */
 .empty-state p {
     color: #6b7280;
     margin-bottom: 24px;
@@ -442,6 +500,7 @@ body {
    SUCCESS / CANCEL PAGES
    ======================================== */
 
+/* Centred white card shown after a payment succeeds or is cancelled */
 .result-card {
     background-color: white;
     border-radius: 10px;
@@ -453,11 +512,13 @@ body {
     margin: 0 auto;
 }
 
+/* Large emoji (tick or cross) at the top of the result card */
 .result-icon {
     font-size: 4rem;
     margin-bottom: 16px;
 }
 
+/* Main result heading — "Payment Successful!" or "Payment Cancelled" */
 .result-card h1 {
     font-size: 1.75rem;
     font-weight: 700;
@@ -465,17 +526,20 @@ body {
     margin-bottom: 12px;
 }
 
+/* Supporting paragraph text on the result page */
 .result-card p {
     color: #6b7280;
     margin-bottom: 8px;
 }
 
+/* Small grey order reference line — "Order #5 · £29.99" */
 .result-card .order-id {
     font-size: 0.875rem;
     color: #9ca3af;
     margin-bottom: 32px;
 }
 
+/* Row of action buttons at the bottom of the result card */
 .result-card-actions {
     display: flex;
     gap: 12px;
@@ -487,6 +551,7 @@ body {
    ORDERS TABLE
    ======================================== */
 
+/* White card wrapping the order history table */
 .orders-card {
     background-color: white;
     border-radius: 10px;
@@ -495,11 +560,13 @@ body {
     overflow: hidden;
 }
 
+/* Full-width orders table */
 .orders-table {
     width: 100%;
     border-collapse: collapse;
 }
 
+/* Uppercase grey column headers, same style as cart table */
 .orders-table th {
     padding: 14px 20px;
     text-align: left;
@@ -512,16 +579,19 @@ body {
     border-bottom: 1px solid #e5e7eb;
 }
 
+/* vertically aligns to top so multi-line item lists look correct */
 .orders-table td {
     padding: 16px 20px;
     border-bottom: 1px solid #f3f4f6;
     vertical-align: top;
 }
 
+/* No border below the last order row */
 .orders-table tr:last-child td {
     border-bottom: none;
 }
 
+/* Pill badge showing the order status (paid / pending / failed) */
 .status-badge {
     display: inline-block;
     padding: 3px 10px;
@@ -532,16 +602,19 @@ body {
     letter-spacing: 0.04em;
 }
 
+/* Green for paid, amber for pending, red for failed */
 .status-paid    { background-color: #d1fae5; color: #065f46; }
 .status-pending { background-color: #fef3c7; color: #92400e; }
 .status-failed  { background-color: #fee2e2; color: #991b1b; }
 
+/* List of products inside a single order row — no bullets, compact */
 .order-items-list {
     list-style: none;
     font-size: 0.875rem;
     color: #4b5563;
 }
 
+/* Tiny gap between each line item */
 .order-items-list li {
     margin-bottom: 2px;
 }
@@ -550,6 +623,7 @@ body {
    ADMIN TABLES
    ======================================== */
 
+/* White card wrapping the admin product management table */
 .admin-card {
     background-color: white;
     border-radius: 10px;
@@ -558,6 +632,7 @@ body {
     overflow: hidden;
 }
 
+/* Header row above the table — title on the left, "Add" button on the right */
 .admin-card-header {
     padding: 20px 24px;
     border-bottom: 1px solid #e5e7eb;
@@ -566,17 +641,20 @@ body {
     align-items: center;
 }
 
+/* "All Products (N)" heading in the admin card header */
 .admin-card-header h2 {
     font-size: 1.125rem;
     font-weight: 700;
     color: #111827;
 }
 
+/* Admin product table — same layout as the other tables */
 .admin-table {
     width: 100%;
     border-collapse: collapse;
 }
 
+/* Uppercase grey column headers */
 .admin-table th {
     padding: 12px 20px;
     text-align: left;
@@ -589,6 +667,7 @@ body {
     border-bottom: 1px solid #e5e7eb;
 }
 
+/* Standard cell padding, vertically centred */
 .admin-table td {
     padding: 14px 20px;
     border-bottom: 1px solid #f3f4f6;
@@ -596,23 +675,29 @@ body {
     font-size: 0.9375rem;
 }
 
+/* No border below the last product row */
 .admin-table tr:last-child td {
     border-bottom: none;
 }
 
+/* Inline group of Edit and Delete buttons in the Actions column */
 .admin-table-actions {
     display: flex;
     gap: 8px;
     align-items: center;
 }
 
+/* Green pill shown when a product is visible to customers */
 .active-badge   { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; background-color: #d1fae5; color: #065f46; }
+
+/* Grey pill shown when a product is hidden from the shop */
 .inactive-badge { display: inline-block; padding: 2px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; background-color: #f3f4f6; color: #6b7280; }
 
 /* ========================================
    PRODUCT FORM (admin)
    ======================================== */
 
+/* White card containing the add/edit product form */
 .form-card {
     background-color: white;
     border-radius: 10px;
@@ -622,10 +707,12 @@ body {
     max-width: 700px;
 }
 
+/* Vertical spacing between each form field group (label + input) */
 .form-group {
     margin-bottom: 24px;
 }
 
+/* Bold label above each field */
 .form-label {
     display: block;
     font-size: 0.875rem;
@@ -634,6 +721,7 @@ body {
     margin-bottom: 6px;
 }
 
+/* Text input and textarea — full width, consistent border and padding */
 .form-input,
 .form-textarea {
     width: 100%;
@@ -646,6 +734,7 @@ body {
     transition: border-color 0.2s, box-shadow 0.2s;
 }
 
+/* Blue border and glow ring when the field is focused */
 .form-input:focus,
 .form-textarea:focus {
     outline: none;
@@ -653,23 +742,27 @@ body {
     box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
 }
 
+/* Taller textarea for the product description field; user can resize vertically */
 .form-textarea {
     min-height: 120px;
     resize: vertical;
 }
 
+/* Small grey helper text shown below a field (e.g. "Enter price in pounds") */
 .form-hint {
     font-size: 0.8125rem;
     color: #6b7280;
     margin-top: 4px;
 }
 
+/* Inline layout for the "Active" checkbox and its label */
 .form-checkbox-row {
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
+/* Larger, blue-accented checkbox */
 .form-checkbox-row input[type="checkbox"] {
     width: 18px;
     height: 18px;
@@ -677,12 +770,14 @@ body {
     accent-color: #2563eb;
 }
 
+/* Submit and Cancel button row at the bottom of the form */
 .form-actions {
     display: flex;
     gap: 12px;
     margin-top: 32px;
 }
 
+/* Red banner shown at the top of the form when validation fails */
 .error-banner {
     background-color: #fee2e2;
     border-left: 4px solid #ef4444;
@@ -697,6 +792,7 @@ body {
    BACK LINK
    ======================================== */
 
+/* "← Back to Shop" navigation link above page content */
 .back-link {
     display: inline-flex;
     align-items: center;
@@ -708,6 +804,7 @@ body {
     margin-bottom: 24px;
 }
 
+/* Underline on hover to confirm it's clickable */
 .back-link:hover {
     text-decoration: underline;
 }
@@ -717,14 +814,17 @@ body {
    ======================================== */
 
 @media (max-width: 768px) {
+    /* Smaller heading in the banner */
     .page-header h1 {
         font-size: 1.75rem;
     }
 
+    /* Stack image above info instead of side by side */
     .product-detail {
         grid-template-columns: 1fr;
     }
 
+    /* Shorter image panel when stacked */
     .product-detail-img-wrap {
         min-height: 240px;
     }
@@ -733,18 +833,22 @@ body {
         min-height: 240px;
     }
 
+    /* Less padding on the info panel at tablet size */
     .product-detail-info {
         padding: 24px;
     }
 
+    /* Reduce padding on the success/cancel card */
     .result-card {
         padding: 32px 20px;
     }
 
+    /* Reduce padding on the admin product form card */
     .form-card {
         padding: 24px;
     }
 
+    /* Stack checkout buttons vertically on narrow screens */
     .cart-actions {
         flex-direction: column;
         align-items: stretch;
@@ -756,23 +860,28 @@ body {
    ======================================== */
 
 @media (max-width: 640px) {
+    /* Tighter page padding and less top/bottom margin on mobile */
     .container {
         padding: 0 16px;
         margin: 24px auto;
     }
 
+    /* Single column for the product grid on small screens */
     .product-grid {
         grid-template-columns: 1fr;
     }
 
+    /* Tighter navbar padding */
     .navbar {
         padding: 12px 16px;
     }
 
+    /* Tighter nav link spacing */
     .navbar-links {
         gap: 12px;
     }
 
+    /* Smaller cell padding in all tables to fit on a narrow screen */
     .orders-table th,
     .orders-table td,
     .cart-table th,
@@ -788,6 +897,7 @@ body {
    ACCESSIBILITY
    ======================================== */
 
+/* Visible keyboard focus ring for all interactive elements */
 a:focus,
 button:focus,
 input:focus,
@@ -796,6 +906,8 @@ textarea:focus {
     outline-offset: 2px;
 }
 
+/* Disable CSS transitions for users who have requested reduced motion
+   in their OS accessibility settings */
 @media (prefers-reduced-motion: reduce) {
     .product-card,
     .btn,
