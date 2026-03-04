@@ -43,17 +43,18 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 # Disable a SQLAlchemy feature we don't need (saves memory/warnings)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# ── Outlook SMTP settings ─────────────────────────────────────────────────
-# Flask-Mail will use these to connect to Outlook and send emails.
-# The actual address and password come from your .env file.
-# If you have 2FA enabled on your Microsoft account, generate an App Password at:
-#   https://account.microsoft.com/security → Advanced security → App passwords
-app.config['MAIL_SERVER'] = 'smtp.office365.com'  # Outlook/Office 365 outgoing mail server
-app.config['MAIL_PORT'] = 587                      # Port 587 = TLS/STARTTLS (secure)
-app.config['MAIL_USE_TLS'] = True                  # Encrypt the connection
-app.config['MAIL_USERNAME'] = os.environ.get('OUTLOOK_ADDRESS')       # Your Outlook address
-app.config['MAIL_PASSWORD'] = os.environ.get('OUTLOOK_PASSWORD')      # Your Outlook password
-app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('OUTLOOK_ADDRESS') # "From" address on emails
+# ── Gmail SMTP settings ───────────────────────────────────────────────────
+# Flask-Mail will use these to connect to Gmail and send emails.
+# The actual address and App Password come from your .env file.
+# To get a Gmail App Password:
+#   1. Enable 2-Step Verification at myaccount.google.com/security
+#   2. Go to myaccount.google.com/apppasswords → create one for "Mail"
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'   # Gmail's outgoing mail server
+app.config['MAIL_PORT'] = 587                   # Port 587 = TLS/STARTTLS (secure)
+app.config['MAIL_USE_TLS'] = True               # Encrypt the connection
+app.config['MAIL_USERNAME'] = os.environ.get('GMAIL_ADDRESS')       # Your Gmail address
+app.config['MAIL_PASSWORD'] = os.environ.get('GMAIL_APP_PASSWORD')  # Your Gmail App Password
+app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('GMAIL_ADDRESS') # "From" address on emails
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -65,7 +66,7 @@ app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('OUTLOOK_ADDRESS') # "From" a
 db.init_app(app)       # Connect SQLAlchemy to our app (enables db.session, db.create_all, etc.)
 csrf.init_app(app)     # Enable CSRF protection globally across all forms
 limiter.init_app(app)  # Enable rate limiting (individual routes are limited in their blueprints)
-mail.init_app(app)     # Connect Flask-Mail using the Outlook config above
+mail.init_app(app)     # Connect Flask-Mail using the Gmail config above
 
 
 # ─────────────────────────────────────────────────────────────────────────────
