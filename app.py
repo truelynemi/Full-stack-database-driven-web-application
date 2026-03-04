@@ -25,6 +25,7 @@ from models import db             # SQLAlchemy database object
 from extensions import csrf, limiter, mail  # Extension objects from extensions.py
 from auth import auth_bp          # Authentication Blueprint (login, register, etc.)
 from main import main_bp          # Main Blueprint (dashboards, profile, about)
+from shop import shop_bp          # Shop Blueprint (catalogue, cart, checkout, orders)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -56,6 +57,11 @@ app.config['MAIL_USERNAME'] = os.environ.get('GMAIL_ADDRESS')       # Your Gmail
 app.config['MAIL_PASSWORD'] = os.environ.get('GMAIL_APP_PASSWORD')  # Your Gmail App Password
 app.config['MAIL_DEFAULT_SENDER'] = os.environ.get('GMAIL_ADDRESS') # "From" address on emails
 
+# ── Stripe settings ───────────────────────────────────────────────────────────
+# The publishable key is safe to expose in HTML (used by client-side Stripe.js if needed).
+# The secret key must NEVER be exposed — it stays server-side only.
+app.config['STRIPE_PUBLISHABLE_KEY'] = os.environ.get('STRIPE_PUBLISHABLE_KEY')
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # INITIALISE EXTENSIONS
@@ -73,8 +79,9 @@ mail.init_app(app)     # Connect Flask-Mail using the Gmail config above
 # REGISTER BLUEPRINTS
 # ─────────────────────────────────────────────────────────────────────────────
 
-app.register_blueprint(auth_bp)  # Auth routes: /login, /register, /logout, etc.
-app.register_blueprint(main_bp)  # Main routes: /user_dashboard, /admin_dashboard, /profile, /about
+app.register_blueprint(auth_bp)   # Auth routes: /login, /register, /logout, etc.
+app.register_blueprint(main_bp)   # Main routes: /user_dashboard, /admin_dashboard, /profile, /about
+app.register_blueprint(shop_bp)   # Shop routes: /shop, /cart, /checkout/*, /orders
 
 
 # ─────────────────────────────────────────────────────────────────────────────

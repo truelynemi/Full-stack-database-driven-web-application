@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ product.name }} — Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="navbar">
+    <a href="{{ url_for('main.user_dashboard') }}" class="navbar-brand">MyApp</a>
+    <ul class="navbar-links">
+        <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('shop.orders') }}">My Orders</a></li>
+        <li>
+            <a href="{{ url_for('shop.cart') }}" class="cart-link">
+                🛒 Cart
+                {% if cart_count > 0 %}
+                <span class="cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
+    </ul>
+</nav>
+
+<!-- ── Flash messages ── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- ── Product detail ── -->
+<div class="container">
+    <a href="{{ url_for('shop.catalogue') }}" class="back-link">← Back to Shop</a>
+
+    <div class="product-detail">
+        <!-- Image -->
+        <div class="product-detail-img-wrap">
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}">
+            {% else %}
+            <div class="product-detail-img-placeholder">🛍️</div>
+            {% endif %}
+        </div>
+
+        <!-- Info -->
+        <div class="product-detail-info">
+            <h1 class="product-detail-name">{{ product.name }}</h1>
+            <div class="product-detail-price">£{{ "%.2f"|format(product.price / 100) }}</div>
+            <p class="product-detail-desc">{{ product.description }}</p>
+            <form action="{{ url_for('shop.add_to_cart', product_id=product.id) }}" method="post">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-primary btn-lg">🛒 Add to Cart</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop — Browse Products</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="navbar">
+    <a href="{{ url_for('main.user_dashboard') }}" class="navbar-brand">MyApp</a>
+    <ul class="navbar-links">
+        <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('shop.orders') }}">My Orders</a></li>
+        <li>
+            <a href="{{ url_for('shop.cart') }}" class="cart-link">
+                🛒 Cart
+                {% if cart_count > 0 %}
+                <span class="cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
+    </ul>
+</nav>
+
+<!-- ── Page header ── -->
+<div class="page-header">
+    <h1>Shop</h1>
+    <p>Browse our products and add them to your cart.</p>
+</div>
+
+<!-- ── Flash messages ── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container">
+    {% for category, message in messages %}
+    <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- ── Product grid ── -->
+<div class="container">
+    {% if products %}
+    <div class="product-grid">
+        {% for product in products %}
+        <div class="product-card">
+            {% if product.image_url %}
+            <img src="{{ product.image_url }}" alt="{{ product.name }}" class="product-card-img">
+            {% else %}
+            <div class="product-card-img-placeholder">🛍️</div>
+            {% endif %}
+
+            <div class="product-card-body">
+                <div class="product-card-name">{{ product.name }}</div>
+                <div class="product-card-desc">{{ product.description }}</div>
+                <div class="product-card-footer">
+                    <span class="product-price">£{{ "%.2f"|format(product.price / 100) }}</span>
+                    <div style="display:flex;gap:8px;">
+                        <a href="{{ url_for('shop.product_detail', product_id=product.id) }}" class="btn btn-secondary btn-sm">View</a>
+                        <form action="{{ url_for('shop.add_to_cart', product_id=product.id) }}" method="post" style="margin:0;">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-primary btn-sm">Add to Cart</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">🛍️</div>
+        <h2>No products yet</h2>
+        <p>Check back soon — products will appear here once they're added.</p>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

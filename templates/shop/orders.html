@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Orders — Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="navbar">
+    <a href="{{ url_for('main.user_dashboard') }}" class="navbar-brand">MyApp</a>
+    <ul class="navbar-links">
+        <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('shop.catalogue') }}">Shop</a></li>
+        <li>
+            <a href="{{ url_for('shop.cart') }}" class="cart-link">
+                🛒 Cart
+                {% if cart_count > 0 %}
+                <span class="cart-badge">{{ cart_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+        <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
+    </ul>
+</nav>
+
+<!-- ── Page header ── -->
+<div class="page-header">
+    <h1>My Orders</h1>
+    <p>Your full purchase history.</p>
+</div>
+
+<div class="container">
+    {% if orders %}
+    <div class="orders-card">
+        <table class="orders-table">
+            <thead>
+                <tr>
+                    <th>Order #</th>
+                    <th>Date</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>#{{ order.id }}</td>
+                    <td>{{ order.created_at.strftime('%d %b %Y, %H:%M') }}</td>
+                    <td>
+                        <ul class="order-items-list">
+                            {% for item in order.items %}
+                            <li>{{ item.quantity }}× {{ item.product.name if item.product else 'Product' }}</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                    <td>£{{ "%.2f"|format(order.amount_total / 100) }}</td>
+                    <td>
+                        <span class="status-badge status-{{ order.status }}">{{ order.status }}</span>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">📦</div>
+        <h2>No orders yet</h2>
+        <p>Your completed purchases will appear here.</p>
+        <a href="{{ url_for('shop.catalogue') }}" class="btn btn-primary">Start Shopping</a>
+    </div>
+    {% endif %}
+</div>
+
+</body>
+</html>

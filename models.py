@@ -59,6 +59,66 @@ class User(db.Model):
     # which sets this to True.
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
 
+    # Relationship to orders — lets us do user.orders to get all their orders
+    orders = db.relationship('Order', backref='user', lazy=True)
+
     def __repr__(self):
         """How this object displays in logs and the Python shell."""
         return f'<User {self.email}>'
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SHOP MODELS
+# ─────────────────────────────────────────────────────────────────────────────
+
+class Product(db.Model):
+    """A product available for purchase in the shop."""
+    __tablename__ = 'products'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    name        = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=False)
+    # Price stored in pence/cents to avoid floating-point issues. e.g. 999 = £9.99
+    price       = db.Column(db.Integer, nullable=False)
+    image_url   = db.Column(db.String(300), nullable=True)
+    is_active   = db.Column(db.Boolean, default=True, nullable=False)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    items = db.relationship('OrderItem', backref='product', lazy=True)
+
+    def __repr__(self):
+        return f'<Product {self.name}>'
+
+
+class Order(db.Model):
+    """A completed (or pending) purchase by a user."""
+    __tablename__ = 'orders'
+
+    id                         = db.Column(db.Integer, primary_key=True)
+    user_id                    = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    stripe_checkout_session_id = db.Column(db.String(200), unique=True)
+    # Total in pence/cents, e.g. 1998 = £19.98
+    amount_total               = db.Column(db.Integer, nullable=False)
+    # 'pending' → created, 'paid' → Stripe confirmed payment, 'failed' → error
+    status                     = db.Column(db.String(20), default='pending', nullable=False)
+    created_at                 = db.Column(db.DateTime, default=datetime.utcnow)
+
+    items = db.relationship('OrderItem', backref='order', lazy=True)
+
+    def __repr__(self):
+        return f'<Order {self.id} status={self.status}>'
+
+
+class OrderItem(db.Model):
+    """One line item within an Order (which product, how many, at what price)."""
+    __tablename__ = 'order_items'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    order_id   = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    quantity   = db.Column(db.Integer, nullable=False)
+    # Snapshot of price at the moment of purchase so historical orders stay accurate
+    unit_price = db.Column(db.Integer, nullable=False)
+
+    def __repr__(self):
+        return f'<OrderItem order={self.order_id} product={self.product_id} qty={self.quantity}>'

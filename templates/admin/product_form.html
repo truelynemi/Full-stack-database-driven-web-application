@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ 'Edit' if action == 'edit' else 'New' }} Product — Admin</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="navbar">
+    <a href="{{ url_for('main.admin_dashboard') }}" class="navbar-brand">MyApp Admin</a>
+    <ul class="navbar-links">
+        <li><a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('main.admin_products') }}">Products</a></li>
+        <li><a href="{{ url_for('shop.catalogue') }}">View Shop</a></li>
+        <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
+    </ul>
+</nav>
+
+<!-- ── Page header ── -->
+<div class="page-header">
+    <h1>{{ 'Edit Product' if action == 'edit' else 'New Product' }}</h1>
+</div>
+
+<div class="container">
+    <a href="{{ url_for('main.admin_products') }}" class="back-link">← Back to Products</a>
+
+    <div class="form-card">
+        {% if error %}
+        <div class="error-banner">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <!-- Name -->
+            <div class="form-group">
+                <label class="form-label" for="name">Product Name <span style="color:#ef4444;">*</span></label>
+                <input type="text" id="name" name="name" class="form-input" required maxlength="120"
+                       value="{{ product.name if product else '' }}">
+            </div>
+
+            <!-- Description -->
+            <div class="form-group">
+                <label class="form-label" for="description">Description <span style="color:#ef4444;">*</span></label>
+                <textarea id="description" name="description" class="form-textarea" required>{{ product.description if product else '' }}</textarea>
+            </div>
+
+            <!-- Price -->
+            <div class="form-group">
+                <label class="form-label" for="price">Price (£) <span style="color:#ef4444;">*</span></label>
+                <input type="number" id="price" name="price" class="form-input" required
+                       min="0.01" step="0.01" placeholder="9.99"
+                       value="{{ '%.2f'|format(product.price / 100) if product else '' }}">
+                <p class="form-hint">Enter the price in pounds, e.g. 9.99 for £9.99.</p>
+            </div>
+
+            <!-- Image URL -->
+            <div class="form-group">
+                <label class="form-label" for="image_url">Image URL <span style="color:#9ca3af;font-weight:400;">(optional)</span></label>
+                <input type="url" id="image_url" name="image_url" class="form-input"
+                       placeholder="https://example.com/image.jpg"
+                       value="{{ product.image_url if product and product.image_url else '' }}">
+                <p class="form-hint">Paste a direct link to an image. Leave blank for a default icon.</p>
+            </div>
+
+            <!-- Active toggle -->
+            <div class="form-group">
+                <div class="form-checkbox-row">
+                    <input type="checkbox" id="is_active" name="is_active"
+                           {% if product is none or product.is_active %}checked{% endif %}>
+                    <label class="form-label" for="is_active" style="margin-bottom:0;cursor:pointer;">
+                        Active (visible to customers in the shop)
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    {{ 'Save Changes' if action == 'edit' else 'Create Product' }}
+                </button>
+                <a href="{{ url_for('main.admin_products') }}" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>
