@@ -17,3 +17,9 @@ This is not a finished project — it’s a template for my exam. Feel free to e
 - Forgot Password / Recovery
 - Terms of Serivce
 - Privacy Policy 
+- Secure Session Management
+- Role-Based Access Contro
+- Remember Me 
+- Resend Verification Email
+- User Profile Management
+- Input Sanitisation
