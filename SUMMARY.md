@@ -14,7 +14,7 @@ Users can create an account, verify their email, log in, log out, and reset thei
 
 ```
 project/
-├── app.py               — starts the app, wires everything together (~70 lines)
+├── app.py               — starts the app, wires everything together
 ├── extensions.py        — shared tools: CSRF protection, rate limiter, email sender
 ├── models.py            — the database table definition (User)
 ├── requirements.txt     — list of packages to install
@@ -27,9 +27,14 @@ project/
 │   ├── helpers.py       — shared functions: tokens, emails, login_required
 │   └── routes.py        — route handlers: /login, /register, /logout, etc.
 │
-├── main/                — Blueprint package: dashboards, profile, about page
+├── main/                — Blueprint package: dashboards, profile, and public pages
 │   ├── __init__.py      — creates the Blueprint object
-│   └── routes.py        — route handlers: /user_dashboard, /admin_dashboard, /profile, /about
+│   └── routes.py        — route handlers: /user_dashboard, /admin_dashboard, /profile, /about, /privacy, /terms
+│
+├── static/              — public files served directly (CSS, images, etc.)
+│   └── css/
+│       ├── privacy.css  — styles for the Privacy Policy page (green scheme)
+│       └── terms.css    — styles for the Terms of Service page (red scheme)
 │
 └── templates/           — all HTML pages, organised by blueprint
     ├── auth/            — templates for authentication pages
@@ -39,11 +44,13 @@ project/
     │   ├── reset_password.html
     │   ├── verify_pending.html
     │   └── resend_verification.html
-    └── main/            — templates for dashboard and profile pages
+    └── main/            — templates for dashboard, profile, and legal pages
         ├── about.html
         ├── user_dashboard.html
         ├── admin_dashboard.html
-        └── profile.html
+        ├── profile.html
+        ├── privacy.html — Privacy Policy page with sticky quick-nav sidebar
+        └── terms.html   — Terms of Service page with sticky quick-nav sidebar
 ```
 
 ### Why this structure?
@@ -94,6 +101,10 @@ This happens on both the **client side** (JavaScript in the browser before submi
 ### 7. Client-Side Validation
 **What it is:** JavaScript in `registration.html` checks the password before the form is even sent to the server. This gives the user instant feedback without a page reload.
 **Important:** This is a convenience feature only — it can be bypassed by anyone who knows what they're doing. The server-side checks in `auth/routes.py` are the real security.
+
+### 8. Terms & Conditions Agreement
+**What it is:** Users must tick a checkbox confirming they agree to the Terms of Service before their account is created.
+**How we enforce it:** The checkbox is validated on both the client (HTML `required`) and the server (`auth/routes.py` checks `form.agree_terms.data`). If unticked, registration is blocked with a clear error message. The label links to the full Terms of Service page (`/terms`) which opens in a new tab.
 
 ---
 
@@ -196,3 +207,4 @@ Visit: http://127.0.0.1:5000/register
 | Flask-Mail | Sends emails via Gmail SMTP |
 | Werkzeug | Provides password hashing (comes with Flask) |
 | itsdangerous | Creates signed, expiring tokens for email links |
+| python-dotenv | Loads `.env` file into environment variables at startup |
