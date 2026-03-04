@@ -252,6 +252,18 @@ def admin_product_delete(product_id):
         return guard
 
     product = Product.query.get_or_404(product_id)
+
+    # Guard: if any orders reference this product, block the hard delete.
+    # Deleting it would leave order_items rows pointing to a missing product,
+    # which breaks the /orders page. Admins should deactivate instead.
+    if product.items:
+        flash(
+            f'Cannot delete "{product.name}" — it has existing orders. '
+            'Deactivate it instead by unchecking "Active" in the edit form.',
+            'danger'
+        )
+        return redirect(url_for('main.admin_products'))
+
     name = product.name
     db.session.delete(product)
     db.session.commit()
