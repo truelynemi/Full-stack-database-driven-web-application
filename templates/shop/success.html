@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Successful — Shop</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+</head>
+<body>
+
+<!-- ── Navigation ── -->
+<nav class="navbar">
+    <a href="{{ url_for('main.user_dashboard') }}" class="navbar-brand">MyApp</a>
+    <ul class="navbar-links">
+        <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('shop.catalogue') }}">Shop</a></li>
+        <li><a href="{{ url_for('shop.orders') }}">My Orders</a></li>
+        <li>
+            <a href="{{ url_for('shop.cart') }}" class="cart-link">🛒 Cart</a>
+        </li>
+        <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
+    </ul>
+</nav>
+
+<div class="container">
+    <div class="result-card">
+        <div class="result-icon">✅</div>
+        <h1>Payment Successful!</h1>
+        <p>Thank you for your purchase. Your order has been confirmed.</p>
+        <p class="order-id">Order #{{ order.id }} &nbsp;·&nbsp; £{{ "%.2f"|format(order.amount_total / 100) }}</p>
+
+        {% if order.items %}
+        <table class="cart-table" style="text-align:left;margin-bottom:24px;">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Qty</th>
+                    <th>Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in order.items %}
+                <tr>
+                    <td>{{ item.product.name if item.product else 'Product' }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td>£{{ "%.2f"|format(item.unit_price * item.quantity / 100) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+
+        <div class="result-card-actions">
+            <a href="{{ url_for('shop.orders') }}" class="btn btn-primary">View My Orders</a>
+            <a href="{{ url_for('shop.catalogue') }}" class="btn btn-secondary">Continue Shopping</a>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

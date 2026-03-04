@@ -7,3 +7,4 @@ Werkzeug
 Flask-Mail
 itsdangerous
 python-dotenv
+stripe
