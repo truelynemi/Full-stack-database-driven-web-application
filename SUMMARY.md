@@ -5,11 +5,12 @@ Everything built in this project, explained in plain English. Written as a refer
 
 ## What is this project?
 
-A **full-stack web application** built with Python and Flask. It has three main parts:
+A **full-stack web application** built with Python and Flask. It has four main parts:
 
-1. **Auth system** — users can register, verify their email, log in, log out, and reset their password securely.
-2. **Shop** — logged-in users can browse a product catalogue, add items to a cart, and pay via Stripe.
-3. **Admin panel** — admin accounts can add, edit, and deactivate products without touching the database directly.
+1. **Auth system** — users can register, verify their email, log in (with optional 2FA), log out, and reset their password securely.
+2. **Shop** — logged-in users can browse a product catalogue, add items to a cart, pay via Stripe, and receive an HTML receipt email.
+3. **Booking system** — users can search available time slots for bookable services and reserve them; double-booking and capacity limits are enforced.
+4. **Admin panel** — admin accounts can manage products, bookable services, time slots, and view all bookings without touching the database directly.
 
 ---
 
@@ -448,3 +449,59 @@ Hardcoded to GBP. To change, find `'currency': 'gbp'` in `shop/routes.py` and re
 | python-dotenv | Loads `.env` file into `os.environ` at startup |
 | stripe | Creates payment sessions and verifies payments via the Stripe API |
 | re (stdlib) | Python's built-in regex module — used for email and password validation |
+| secrets (stdlib) | `secrets.randbelow()` — cryptographically secure OTP generation for 2FA |
+
+---
+
+## How the booking system works
+
+### Overview
+The booking system is a **generic, reusable template** — admin creates named services (e.g. "Consultation", "Studio Session"), attaches time slots with date/time/capacity, and users browse and reserve them. No payment is required.
+
+### Models
+Three new tables added to `models.py`:
+
+| Model | Table | Purpose |
+|-------|-------|---------|
+| `BookableService` | `bookable_services` | A named service admin creates (name, description, active flag) |
+| `TimeSlot` | `time_slots` | A specific date + start/end time + capacity attached to a service |
+| `Booking` | `bookings` | A user's reservation for a slot (status: `confirmed` / `cancelled`) |
+
+### User flow
+1. `/bookings` — search/browse active services; optional date filter shows only services with available slots on that day
+2. `/bookings/<service_id>` — see all upcoming slots for a service, colour-coded: green (available), blue (already booked by you), grey (full)
+3. Book form on each available slot → POST `/bookings/<slot_id>/book`
+4. `/bookings/confirm/<id>` — confirmation page with booking reference
+5. `/bookings/my` — list of all the user's bookings with cancel button
+
+### Admin flow
+1. `/admin/services` — list all services; each shows its time slots with confirmed/capacity counts
+2. `/admin/services/new` — create a service (name, description, active toggle)
+3. `/admin/services/<id>/edit` — edit a service
+4. `/admin/services/<id>/slots/new` — add a time slot (date, start time, end time, capacity)
+5. `/admin/bookings` — read-only view of every booking across all services
+
+### Double-booking / capacity enforcement
+Two guards run in sequence in `POST /bookings/<slot_id>/book`:
+
+```python
+# Guard 1: prevent the same user booking the same slot twice
+already = Booking.query.filter_by(slot_id=slot_id, user_id=user_id, status='confirmed').first()
+
+# Guard 2: enforce capacity ceiling
+confirmed_count = Booking.query.filter_by(slot_id=slot_id, status='confirmed').count()
+if confirmed_count >= slot.capacity:
+    flash('Sorry, that slot is now fully booked.', 'danger')
+```
+
+`capacity=1` (the default) means only one user can ever hold a confirmed booking — classic no-double-booking. Set `capacity=10` to allow 10 concurrent bookings on the same slot.
+
+### Cancellation
+Bookings are never hard-deleted. Setting `status='cancelled'` preserves history and frees up the space in the capacity count (only `status='confirmed'` bookings count against capacity).
+
+### Admin delete guards
+- **Delete service** — blocked if the service has any time slots; admin must delete all slots first (or deactivate instead).
+- **Delete slot** — blocked if any confirmed bookings reference it; admin must cancel those bookings first.
+
+### DB note
+Three new tables. **Delete `app.db` and re-run `python seed.py`** after pulling this change — `db.create_all()` does not add new tables to an existing database.
