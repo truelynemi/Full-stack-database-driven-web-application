@@ -133,3 +133,74 @@ class OrderItem(db.Model):
 
     def __repr__(self):
         return f'<OrderItem order={self.order_id} product={self.product_id} qty={self.quantity}>'
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BOOKING MODELS
+# Generic booking system: admin creates BookableServices, attaches TimeSlots,
+# users reserve slots as Bookings.  No payment required.
+# ─────────────────────────────────────────────────────────────────────────────
+
+class BookableService(db.Model):
+    """
+    A service that can be booked — e.g. 'Consultation', 'Studio Session'.
+    Admin creates and manages these from /admin/services.
+    """
+    __tablename__ = 'bookable_services'
+
+    id          = db.Column(db.Integer, primary_key=True)
+    name        = db.Column(db.String(120), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    # is_active=False hides the service from users without deleting it
+    is_active   = db.Column(db.Boolean, default=True, nullable=False)
+    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # One service → many time slots
+    slots = db.relationship('TimeSlot', backref='service', lazy=True)
+
+    def __repr__(self):
+        return f'<BookableService {self.name}>'
+
+
+class TimeSlot(db.Model):
+    """
+    A specific date/time window within a BookableService that users can book.
+    capacity controls how many confirmed bookings are allowed before the slot is full.
+    """
+    __tablename__ = 'time_slots'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    service_id = db.Column(db.Integer, db.ForeignKey('bookable_services.id'), nullable=False)
+    date       = db.Column(db.Date, nullable=False)       # e.g. 2026-03-15
+    start_time = db.Column(db.Time, nullable=False)       # e.g. 10:00
+    end_time   = db.Column(db.Time, nullable=False)       # e.g. 11:00
+    # Default capacity=1 means only one booking allowed (no double-booking).
+    # Set higher to allow multiple users to book the same slot.
+    capacity   = db.Column(db.Integer, nullable=False, default=1)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # One slot → many bookings
+    bookings = db.relationship('Booking', backref='slot', lazy=True)
+
+    def __repr__(self):
+        return f'<TimeSlot {self.date} {self.start_time}–{self.end_time}>'
+
+
+class Booking(db.Model):
+    """
+    A user's reservation for a specific TimeSlot.
+    status='confirmed' = active;  status='cancelled' = user cancelled.
+    Cancelled bookings are kept for audit history rather than deleted.
+    """
+    __tablename__ = 'bookings'
+
+    id         = db.Column(db.Integer, primary_key=True)
+    user_id    = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    slot_id    = db.Column(db.Integer, db.ForeignKey('time_slots.id'), nullable=False)
+    status     = db.Column(db.String(20), nullable=False, default='confirmed')
+    # Optional free-text note from the user at booking time
+    notes      = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f'<Booking user={self.user_id} slot={self.slot_id} status={self.status}>'

@@ -1,0 +1,55 @@
+{% extends 'shop/base_shop.html' %}
+
+{% block title %}Book a Service{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+  <h1 class="page-title">Book a Service</h1>
+
+  <!-- ── Date filter form ── -->
+  <form method="get" action="{{ url_for('bookings.search') }}" class="booking-filter-form">
+    <label for="date">Filter by date:</label>
+    <input type="date" id="date" name="date"
+           value="{{ filter_date.strftime('%Y-%m-%d') if filter_date else '' }}"
+           min="{{ today.strftime('%Y-%m-%d') }}">
+    <button type="submit" class="btn btn-primary">Search</button>
+    {% if filter_date %}
+      <a href="{{ url_for('bookings.search') }}" class="btn btn-secondary">Clear</a>
+    {% endif %}
+  </form>
+
+  {% if filter_date %}
+    <p class="search-hint">Showing services with available slots on <strong>{{ filter_date.strftime('%d %b %Y') }}</strong>.</p>
+  {% endif %}
+
+  <!-- ── Service cards ── -->
+  {% if services %}
+    <div class="service-grid">
+      {% for service in services %}
+        <div class="service-card">
+          <h2 class="service-name">{{ service.name }}</h2>
+          {% if service.description %}
+            <p class="service-desc">{{ service.description }}</p>
+          {% endif %}
+          <p class="service-slots">
+            {% set future_slots = service.slots | selectattr('date', 'ge', today) | list %}
+            {{ future_slots | length }} upcoming slot{{ 's' if future_slots | length != 1 }}
+          </p>
+          <a href="{{ url_for('bookings.detail', service_id=service.id) }}"
+             class="btn btn-primary">View Slots</a>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty-state">
+      {% if filter_date %}
+        No services have available slots on that date. Try a different date.
+      {% else %}
+        No services are currently available. Check back soon.
+      {% endif %}
+    </p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1026,3 +1026,184 @@ textarea:focus {
         transition: none;
     }
 }
+
+
+/* ========================================
+   BOOKING SYSTEM STYLES
+   ======================================== */
+
+/* ── Search page ── */
+.booking-filter-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding: 16px 20px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+}
+.booking-filter-form label { font-weight: 600; color: #374151; }
+.booking-filter-form input[type="date"] {
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+.search-hint { margin-bottom: 16px; color: #6b7280; font-size: 0.9rem; }
+
+/* ── Service grid (search page) ── */
+.service-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+.service-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+.service-name { font-size: 1.125rem; font-weight: 700; color: #111827; }
+.service-desc { color: #6b7280; font-size: 0.9rem; }
+.service-slots { font-size: 0.85rem; color: #9ca3af; }
+
+/* ── Slot list (detail page) ── */
+.slot-list { display: flex; flex-direction: column; gap: 12px; }
+.slot-card {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    padding: 16px 20px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+}
+.slot-card.slot-available { border-left: 4px solid #10b981; }
+.slot-card.slot-full      { border-left: 4px solid #9ca3af; opacity: 0.75; }
+.slot-card.slot-booked    { border-left: 4px solid #2563eb; }
+
+.slot-datetime { display: flex; flex-direction: column; min-width: 160px; }
+.slot-date { font-weight: 600; color: #111827; }
+.slot-time { font-size: 0.875rem; color: #6b7280; }
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.badge-available { background: #ecfdf5; color: #065f46; }
+.badge-full      { background: #f3f4f6; color: #6b7280; }
+.badge-booked    { background: #eff6ff; color: #1e40af; }
+
+/* Book form inside slot card */
+.book-form { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+.notes-input {
+    padding: 7px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    width: 220px;
+}
+.already-booked-note { font-size: 0.85rem; color: #6b7280; margin-left: auto; }
+
+/* ── Confirmation page ── */
+.confirm-page { display: flex; justify-content: center; padding-top: 40px; }
+.confirm-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 48px 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+}
+.confirm-icon {
+    font-size: 3rem;
+    color: #10b981;
+    background: #ecfdf5;
+    width: 72px; height: 72px;
+    line-height: 72px;
+    border-radius: 50%;
+    margin: 0 auto 20px;
+}
+.confirm-card h1 { font-size: 1.5rem; margin-bottom: 24px; color: #111827; }
+.confirm-details { text-align: left; border-top: 1px solid #e5e7eb; padding-top: 20px; margin-bottom: 28px; }
+.confirm-details p { margin-bottom: 10px; color: #374151; font-size: 0.9375rem; }
+.confirm-details strong { color: #111827; }
+.confirm-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── My bookings table ── */
+.bookings-table-wrapper { overflow-x: auto; }
+.bookings-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+}
+.bookings-table th {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 2px solid #e5e7eb;
+    color: #6b7280;
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.bookings-table td {
+    padding: 12px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #374151;
+    vertical-align: middle;
+}
+.bookings-table tr.row-cancelled td { opacity: 0.55; }
+
+/* ── Admin service cards ── */
+.service-admin-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+.service-admin-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+.service-admin-header h2 { font-size: 1.125rem; color: #111827; margin-bottom: 4px; }
+.service-admin-actions { display: flex; gap: 8px; flex-shrink: 0; }
+.slots-section h3 { font-size: 0.875rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+.empty-state-small { color: #9ca3af; font-size: 0.875rem; margin-bottom: 8px; }
+
+/* ── Admin table (shared with product table) ── */
+.admin-table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+.admin-table th {
+    text-align: left; padding: 8px 12px;
+    border-bottom: 2px solid #e5e7eb;
+    color: #6b7280; font-size: 0.75rem;
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+.admin-table td { padding: 10px 12px; border-bottom: 1px solid #f3f4f6; color: #374151; vertical-align: middle; }
+
+/* ── Misc ── */
+.btn-sm { padding: 5px 12px; font-size: 0.8rem; }
+.back-link { display: inline-block; margin-bottom: 16px; color: #2563eb; font-size: 0.875rem; text-decoration: none; }
+.back-link:hover { text-decoration: underline; }
+.subtitle { color: #6b7280; margin-bottom: 24px; }
+.form-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.form-row .form-group { flex: 1; min-width: 140px; }
+.form-hint { color: #9ca3af; font-size: 0.8rem; display: block; margin-top: 4px; }
+.required { color: #ef4444; }

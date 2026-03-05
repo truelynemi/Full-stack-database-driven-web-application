@@ -1,0 +1,45 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}{{ 'Edit' if action == 'edit' else 'New' }} Service{% endblock %}
+
+{% block content %}
+<div class="page-container form-page">
+
+  <a href="{{ url_for('bookings.admin_services') }}" class="back-link">&larr; Back to services</a>
+  <h1 class="page-title">{{ 'Edit Service' if action == 'edit' else 'New Service' }}</h1>
+
+  {% if error %}
+    <p class="form-error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" class="admin-form">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="form-group">
+      <label for="name">Service name <span class="required">*</span></label>
+      <input type="text" id="name" name="name" required maxlength="120"
+             value="{{ service.name if service else '' }}">
+    </div>
+
+    <div class="form-group">
+      <label for="description">Description</label>
+      <textarea id="description" name="description" rows="4"
+                placeholder="What is this service? (optional)">{{ service.description if service and service.description else '' }}</textarea>
+    </div>
+
+    <div class="form-group form-check">
+      <input type="checkbox" id="is_active" name="is_active"
+             {{ 'checked' if not service or service.is_active }}>
+      <label for="is_active">Active (visible to users)</label>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">
+        {{ 'Save Changes' if action == 'edit' else 'Create Service' }}
+      </button>
+      <a href="{{ url_for('bookings.admin_services') }}" class="btn btn-secondary">Cancel</a>
+    </div>
+  </form>
+
+</div>
+{% endblock %}

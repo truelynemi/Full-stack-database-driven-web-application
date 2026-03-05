@@ -1,0 +1,60 @@
+{% extends 'shop/base_shop.html' %}
+
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+  <h1 class="page-title">My Bookings</h1>
+
+  {% if bookings %}
+    <div class="bookings-table-wrapper">
+      <table class="bookings-table">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Notes</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in bookings %}
+            <tr class="{% if b.status == 'cancelled' %}row-cancelled{% endif %}">
+              <td>#{{ b.id }}</td>
+              <td>{{ b.slot.service.name }}</td>
+              <td>{{ b.slot.date.strftime('%d %b %Y') }}</td>
+              <td>{{ b.slot.start_time.strftime('%H:%M') }} – {{ b.slot.end_time.strftime('%H:%M') }}</td>
+              <td>
+                {% if b.status == 'confirmed' %}
+                  <span class="badge badge-available">Confirmed</span>
+                {% else %}
+                  <span class="badge badge-full">Cancelled</span>
+                {% endif %}
+              </td>
+              <td>{{ b.notes or '—' }}</td>
+              <td>
+                {% if b.status == 'confirmed' and b.slot.date >= today %}
+                  <!-- Only show cancel for future confirmed bookings -->
+                  <form method="post"
+                        action="{{ url_for('bookings.cancel', booking_id=b.id) }}"
+                        onsubmit="return confirm('Cancel this booking?')">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger btn-sm">Cancel</button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty-state">You have no bookings yet. <a href="{{ url_for('bookings.search') }}">Browse services</a>.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

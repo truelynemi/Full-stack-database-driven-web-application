@@ -1,0 +1,92 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}Manage Services{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+  <div class="page-header">
+    <h1 class="page-title">Bookable Services</h1>
+    <a href="{{ url_for('bookings.admin_service_new') }}" class="btn btn-primary">+ New Service</a>
+  </div>
+
+  {% if services %}
+    {% for service in services %}
+      <div class="service-admin-card">
+
+        <div class="service-admin-header">
+          <div>
+            <h2>{{ service.name }}
+              {% if not service.is_active %}
+                <span class="badge badge-full">Inactive</span>
+              {% endif %}
+            </h2>
+            {% if service.description %}
+              <p class="service-desc">{{ service.description }}</p>
+            {% endif %}
+          </div>
+          <div class="service-admin-actions">
+            <a href="{{ url_for('bookings.admin_service_edit', service_id=service.id) }}"
+               class="btn btn-secondary btn-sm">Edit</a>
+            <form method="post"
+                  action="{{ url_for('bookings.admin_service_delete', service_id=service.id) }}"
+                  onsubmit="return confirm('Delete service {{ service.name | e }}?')"
+                  style="display:inline;">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Time slots for this service -->
+        <div class="slots-section">
+          <h3>Time Slots</h3>
+          {% if service.slots %}
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Capacity</th>
+                  <th>Confirmed</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for slot in service.slots | sort(attribute='date') %}
+                  {% set confirmed = slot.bookings | selectattr('status', 'eq', 'confirmed') | list | length %}
+                  <tr>
+                    <td>{{ slot.date.strftime('%d %b %Y') }}</td>
+                    <td>{{ slot.start_time.strftime('%H:%M') }}</td>
+                    <td>{{ slot.end_time.strftime('%H:%M') }}</td>
+                    <td>{{ slot.capacity }}</td>
+                    <td>{{ confirmed }} / {{ slot.capacity }}</td>
+                    <td>
+                      <form method="post"
+                            action="{{ url_for('bookings.admin_slot_delete', slot_id=slot.id) }}"
+                            onsubmit="return confirm('Delete this slot?')"
+                            style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          {% else %}
+            <p class="empty-state-small">No slots yet.</p>
+          {% endif %}
+          <a href="{{ url_for('bookings.admin_slot_new', service_id=service.id) }}"
+             class="btn btn-secondary btn-sm" style="margin-top:8px;">+ Add Slot</a>
+        </div>
+
+      </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty-state">No services yet. <a href="{{ url_for('bookings.admin_service_new') }}">Create one</a>.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

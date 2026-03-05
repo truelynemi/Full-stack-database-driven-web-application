@@ -1,0 +1,62 @@
+{% extends 'admin/base_admin.html' %}
+
+{% block title %}All Bookings{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+  <h1 class="page-title">All Bookings</h1>
+
+  {% if bookings %}
+    <div class="bookings-table-wrapper">
+      <table class="bookings-table admin-table">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>User</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Notes</th>
+            <th>Booked at</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for b in bookings %}
+            <tr class="{% if b.status == 'cancelled' %}row-cancelled{% endif %}">
+              <td>#{{ b.id }}</td>
+              <td>
+                <!-- b.slot.user is available via the backref on Booking → User -->
+                {{ b.slot.service.name if b.slot and b.slot.service else '—' }}
+              </td>
+              <td>
+                <!-- user_id stored directly on booking; name via joined user -->
+                #{{ b.user_id }}
+              </td>
+              <td>{{ b.slot.date.strftime('%d %b %Y') if b.slot else '—' }}</td>
+              <td>
+                {% if b.slot %}
+                  {{ b.slot.start_time.strftime('%H:%M') }} – {{ b.slot.end_time.strftime('%H:%M') }}
+                {% else %}—{% endif %}
+              </td>
+              <td>
+                {% if b.status == 'confirmed' %}
+                  <span class="badge badge-available">Confirmed</span>
+                {% else %}
+                  <span class="badge badge-full">Cancelled</span>
+                {% endif %}
+              </td>
+              <td>{{ b.notes or '—' }}</td>
+              <td>{{ b.created_at.strftime('%d %b %Y %H:%M') }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty-state">No bookings have been made yet.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends 'shop/base_shop.html' %}
+
+{% block title %}{{ service.name }} — Availability{% endblock %}
+
+{% block content %}
+<div class="page-container">
+
+  <a href="{{ url_for('bookings.search') }}" class="back-link">&larr; Back to services</a>
+
+  <h1 class="page-title">{{ service.name }}</h1>
+  {% if service.description %}
+    <p class="service-desc">{{ service.description }}</p>
+  {% endif %}
+
+  {% if slot_info %}
+    <div class="slot-list">
+      {% for info in slot_info %}
+        {% set slot = info.slot %}
+        <div class="slot-card {% if info.is_full %}slot-full{% elif info.user_booked %}slot-booked{% else %}slot-available{% endif %}">
+
+          <!-- Date & time -->
+          <div class="slot-datetime">
+            <span class="slot-date">{{ slot.date.strftime('%a %d %b %Y') }}</span>
+            <span class="slot-time">{{ slot.start_time.strftime('%H:%M') }} – {{ slot.end_time.strftime('%H:%M') }}</span>
+          </div>
+
+          <!-- Availability badge -->
+          <div class="slot-status">
+            {% if info.user_booked %}
+              <span class="badge badge-booked">✓ You're booked</span>
+            {% elif info.is_full %}
+              <span class="badge badge-full">Full</span>
+            {% else %}
+              <span class="badge badge-available">{{ info.spaces_left }} space{{ 's' if info.spaces_left != 1 }} left</span>
+            {% endif %}
+          </div>
+
+          <!-- Book form (only when slot is bookable) -->
+          {% if not info.is_full and not info.user_booked %}
+            <form method="post" action="{{ url_for('bookings.book', slot_id=slot.id) }}"
+                  class="book-form">
+              <!-- CSRF token required on every POST -->
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="text" name="notes" placeholder="Optional note (e.g. your name)"
+                     maxlength="200" class="notes-input">
+              <button type="submit" class="btn btn-primary">Book this slot</button>
+            </form>
+          {% elif info.user_booked %}
+            <p class="already-booked-note">Visit <a href="{{ url_for('bookings.my_bookings') }}">My Bookings</a> to cancel.</p>
+          {% endif %}
+
+        </div>
+      {% endfor %}
+    </div>
+
+  {% else %}
+    <p class="empty-state">No upcoming slots available for this service. Check back later.</p>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'shop/base_shop.html' %}
+
+{% block title %}Booking Confirmed{% endblock %}
+
+{% block content %}
+<div class="page-container confirm-page">
+
+  <div class="confirm-card">
+    <div class="confirm-icon">✓</div>
+    <h1>Booking Confirmed!</h1>
+
+    <div class="confirm-details">
+      <p><strong>Service:</strong> {{ booking.slot.service.name }}</p>
+      <p><strong>Date:</strong> {{ booking.slot.date.strftime('%A, %d %B %Y') }}</p>
+      <p><strong>Time:</strong> {{ booking.slot.start_time.strftime('%H:%M') }} – {{ booking.slot.end_time.strftime('%H:%M') }}</p>
+      <p><strong>Booking reference:</strong> #{{ booking.id }}</p>
+      {% if booking.notes %}
+        <p><strong>Your note:</strong> {{ booking.notes }}</p>
+      {% endif %}
+    </div>
+
+    <div class="confirm-actions">
+      <a href="{{ url_for('bookings.my_bookings') }}" class="btn btn-primary">View My Bookings</a>
+      <a href="{{ url_for('bookings.search') }}" class="btn btn-secondary">Book Another</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
