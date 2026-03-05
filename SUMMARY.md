@@ -19,7 +19,7 @@ A **full-stack web application** built with Python and Flask. It has four main p
 ```
 pip install -r requirements.txt
 # Create .env with SECRET_KEY, GMAIL_ADDRESS, GMAIL_APP_PASSWORD, STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY
-python seed.py   # creates tables + admin account + demo products
+python seed.py   # creates tables + admin and test user accounts (no demo products)
 python app.py
 ```
 
@@ -28,16 +28,19 @@ python app.py
 | Admin   | admin@admin.com | Admin1234 |
 | Test user | user@test.com | User1234 |
 
+> Products are not seeded. Log in as admin and use the admin panel to add them.
+
 ---
 
 ## File structure
 
 ```
 project/
-├── app.py               — starts the app, wires everything together
-├── models.py            — all database table definitions (User, Product, Order, OrderItem)
+├── app.py               — starts the app, wires everything together, context processors
+├── models.py            — all database table definitions (User, Product, Order, OrderItem,
+│                          BookableService, TimeSlot, Booking)
 ├── extensions.py        — shared extension objects: CSRF, rate limiter, mail sender
-├── seed.py              — one-time setup script: creates tables, admin user, demo products
+├── seed.py              — one-time setup: creates tables + admin and test user accounts
 ├── requirements.txt     — list of packages to install
 ├── .gitignore           — tells Git what NOT to commit (e.g. .env, database file)
 ├── .env                 — your secret credentials (never committed to GitHub)
@@ -57,38 +60,75 @@ project/
 │   ├── __init__.py      — creates the Blueprint object (shop_bp)
 │   └── routes.py        — /shop, /shop/<id>, /cart, /cart/add|remove, /checkout/*, /orders
 │
-├── static/              — public files served directly (CSS, images)
-│   └── css/
-│       ├── privacy.css  — styles for the Privacy Policy page (green scheme)
-│       ├── terms.css    — styles for the Terms of Service page (red scheme)
-│       └── shop.css     — styles for all shop, cart, and admin product pages
+├── bookings/            — Blueprint: booking system (services, slots, reservations)
+│   ├── __init__.py      — creates the Blueprint object (bookings_bp)
+│   └── routes.py        — /bookings, /bookings/<id>, /bookings/<slot_id>/book,
+│                          /bookings/my, /bookings/<id>/cancel,
+│                          /admin/services/*, /admin/slots/*, /admin/bookings
+│
+├── static/              — public files served directly (CSS, JS)
+│   ├── css/
+│   │   ├── shop.css     — styles for all shop, booking, admin, auth, and main pages
+│   │   ├── privacy.css  — styles for the Privacy Policy page
+│   │   └── terms.css    — styles for the Terms of Service page
+│   └── js/
+│       ├── consent.js   — handles cookie consent banner acceptance
+│       └── userway.js   — loads the UserWay accessibility widget
 │
 └── templates/           — all HTML pages, organised by blueprint
     ├── auth/
+    │   ├── base_auth.html          — base for all auth pages (no nav, has CSS + flash toasts)
     │   ├── login.html
     │   ├── registration.html
     │   ├── forgot_password.html
     │   ├── reset_password.html
     │   ├── verify_pending.html
-    │   └── resend_verification.html
+    │   ├── resend_verification.html
+    │   └── 2fa_verify.html
     ├── main/
-    │   ├── about.html
+    │   ├── base_main.html          — base for logged-in user pages (nav: Dashboard, Shop,
+    │   │                             Orders, Bookings, Profile, Log out)
     │   ├── user_dashboard.html
-    │   ├── admin_dashboard.html
-    │   ├── profile.html
+    │   ├── admin_dashboard.html    — extends admin/base_admin.html; shows quick-action cards
+    │   ├── profile.html            — shows user email top-right next to heading
+    │   ├── about.html
     │   ├── privacy.html
     │   └── terms.html
     ├── shop/
+    │   ├── base_shop.html          — base for shop + booking pages (nav includes cart badge)
     │   ├── catalogue.html
     │   ├── product.html
     │   ├── cart.html
     │   ├── success.html
     │   ├── cancel.html
     │   └── orders.html
-    └── admin/
-        ├── products.html
-        └── product_form.html
+    ├── admin/
+    │   ├── base_admin.html         — base for admin pages (nav: Dashboard, Products,
+    │   │                             Services, All Bookings, View Shop, Log out)
+    │   ├── products.html
+    │   ├── product_form.html
+    │   ├── services.html
+    │   ├── service_form.html
+    │   ├── slot_form.html
+    │   └── all_bookings.html
+    ├── bookings/
+    │   ├── search.html
+    │   ├── detail.html
+    │   ├── confirm.html
+    │   └── my_bookings.html
+    └── email/
+        └── order_receipt.html
 ```
+
+### Template inheritance
+Every page extends one of four base templates, each providing consistent CSS, flash toast messages, cookie consent banner, and UserWay accessibility script:
+
+| Base template | Used by | Navigation |
+|---|---|---|
+| `auth/base_auth.html` | Login, register, forgot password, reset, 2FA, verify | None (user not logged in) |
+| `main/base_main.html` | User dashboard, profile, about | Dashboard, Shop, Orders, Bookings, Profile, Log out |
+| `shop/base_shop.html` | Catalogue, product, cart, orders, booking pages | Full shop nav + cart badge |
+| `admin/base_admin.html` | Admin dashboard, products, services, bookings | Admin-specific nav |
 
 ### Why Blueprints?
 Each Blueprint is a self-contained feature module with its own `__init__.py` and `routes.py`. Blueprints register their routes with `app.register_blueprint()` in `app.py`. The benefit: adding a new section (e.g. `api/` or `blog/`) means creating one new folder — no existing files need to be touched. It also makes it obvious where to look for any given feature.
@@ -293,6 +333,7 @@ email = s.loads(token, salt='email-verify', max_age=3600)
 
 ### Profile update (`/profile`)
 - User can update their full name at any time.
+- The user's email address is displayed top-right on the profile page for reference.
 - Password change is **optional**: only processed if `new_password` field is filled in.
 - Requires correct current password before allowing a change (`check_password_hash`).
 - Same strength rules applied to the new password.
@@ -330,6 +371,8 @@ All prices are stored as integers in pence (£9.99 → `999`) to avoid floating-
 ## How admin product management works
 
 **Access:** `/admin/products` — protected by `@login_required` + `_admin_only()`.
+
+Products only appear in the shop once an admin creates them. No demo products are pre-loaded — the shop starts empty.
 
 | Action | Route | What happens in the DB |
 |--------|-------|------------------------|
