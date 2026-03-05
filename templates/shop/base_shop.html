@@ -21,7 +21,7 @@
         <li>
             <a href="{{ url_for('shop.cart') }}" class="cart-link">
                 🛒 Cart
-                {% if cart_count > 0 %}
+                {% if cart_count|default(0) > 0 %}
                 <span class="cart-badge">{{ cart_count }}</span>
                 {% endif %}
             </a>
