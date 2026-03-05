@@ -19,8 +19,10 @@ import os
 
 import stripe
 from flask import render_template, redirect, url_for, flash, session, request
+from flask_mail import Message
 
-from models import db, Product, Order, OrderItem
+from models import db, Product, Order, OrderItem, User
+from extensions import mail
 from auth.helpers import login_required
 from shop import shop_bp
 
@@ -28,6 +30,31 @@ from shop import shop_bp
 # ─────────────────────────────────────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
+
+def _send_receipt_email(order):
+    """
+    Send an HTML order receipt to the customer.
+    Called after a successful Stripe payment and DB commit.
+    Silently swallowed if mail fails — we never block the success page.
+    """
+    user = User.query.get(order.user_id)
+    if not user:
+        return
+
+    html_body = render_template(
+        'email/order_receipt.html',
+        order=order,
+        user=user,
+        orders_url=url_for('shop.orders', _external=True),
+    )
+
+    msg = Message(
+        subject=f'Your order receipt — Order #{order.id}',
+        recipients=[user.email],
+        html=html_body,
+    )
+    mail.send(msg)
+
 
 def _get_cart():
     """Return the cart dict from the session, creating it if absent."""
@@ -236,6 +263,12 @@ def checkout_success():
             ))
 
     db.session.commit()
+
+    # Send receipt email — wrapped so a mail failure never breaks the checkout flow
+    try:
+        _send_receipt_email(order)
+    except Exception:
+        pass  # Log in production; silently skip for now
 
     # Clear the cart
     session.pop('cart', None)

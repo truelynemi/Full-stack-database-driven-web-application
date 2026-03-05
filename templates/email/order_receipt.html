@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Receipt #{{ order.id }}</title>
+</head>
+<body style="margin:0;padding:0;background-color:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#374151;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#f9fafb;padding:40px 16px;">
+    <tr>
+      <td align="center">
+
+        <!-- Card -->
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:8px;border:1px solid #e5e7eb;box-shadow:0 1px 3px rgba(0,0,0,0.08);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);padding:32px 40px;border-radius:8px 8px 0 0;text-align:center;">
+              <p style="margin:0 0 8px;color:#93c5fd;font-size:0.875rem;letter-spacing:0.05em;text-transform:uppercase;">MyApp</p>
+              <h1 style="margin:0;color:#ffffff;font-size:1.75rem;font-weight:700;">Order Confirmed!</h1>
+              <p style="margin:12px 0 0;color:#bfdbfe;font-size:0.9375rem;">Thank you for your purchase, {{ user.full_name.split()[0] }}.</p>
+            </td>
+          </tr>
+
+          <!-- Order meta -->
+          <tr>
+            <td style="padding:28px 40px 0;border-bottom:1px solid #e5e7eb;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+                <tr>
+                  <td style="padding-bottom:20px;">
+                    <p style="margin:0 0 4px;font-size:0.75rem;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Order number</p>
+                    <p style="margin:0;font-size:1.125rem;font-weight:700;color:#111827;">#{{ order.id }}</p>
+                  </td>
+                  <td style="padding-bottom:20px;text-align:right;">
+                    <p style="margin:0 0 4px;font-size:0.75rem;color:#9ca3af;text-transform:uppercase;letter-spacing:0.05em;">Order total</p>
+                    <p style="margin:0;font-size:1.125rem;font-weight:700;color:#111827;">£{{ "%.2f"|format(order.amount_total / 100) }}</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Line items -->
+          <tr>
+            <td style="padding:24px 40px;">
+              <table width="100%" cellpadding="0" cellspacing="0">
+
+                <!-- Table header -->
+                <tr style="border-bottom:1px solid #e5e7eb;">
+                  <th style="padding:0 0 12px;text-align:left;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Product</th>
+                  <th style="padding:0 0 12px;text-align:center;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Qty</th>
+                  <th style="padding:0 0 12px;text-align:right;font-size:0.75rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;font-weight:600;">Price</th>
+                </tr>
+
+                <!-- Items -->
+                {% for item in order.items %}
+                <tr>
+                  <td style="padding:12px 0;font-size:0.9375rem;color:#374151;border-bottom:1px solid #f3f4f6;">
+                    {{ item.product.name if item.product else 'Product' }}
+                  </td>
+                  <td style="padding:12px 0;text-align:center;font-size:0.9375rem;color:#374151;border-bottom:1px solid #f3f4f6;">
+                    {{ item.quantity }}
+                  </td>
+                  <td style="padding:12px 0;text-align:right;font-size:0.9375rem;color:#374151;border-bottom:1px solid #f3f4f6;">
+                    £{{ "%.2f"|format(item.unit_price * item.quantity / 100) }}
+                  </td>
+                </tr>
+                {% endfor %}
+
+                <!-- Total row -->
+                <tr>
+                  <td colspan="2" style="padding:16px 0 0;font-size:1rem;font-weight:700;color:#111827;">Total</td>
+                  <td style="padding:16px 0 0;text-align:right;font-size:1rem;font-weight:700;color:#1e3a5f;">£{{ "%.2f"|format(order.amount_total / 100) }}</td>
+                </tr>
+
+              </table>
+            </td>
+          </tr>
+
+          <!-- CTA -->
+          <tr>
+            <td style="padding:0 40px 32px;text-align:center;">
+              <a href="{{ orders_url }}"
+                 style="display:inline-block;background:#2563eb;color:#ffffff;text-decoration:none;padding:12px 28px;border-radius:6px;font-size:0.9375rem;font-weight:600;">
+                View My Orders
+              </a>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 40px;background:#f9fafb;border-top:1px solid #e5e7eb;border-radius:0 0 8px 8px;text-align:center;">
+              <p style="margin:0;font-size:0.8125rem;color:#9ca3af;">
+                This is an automated receipt from MyApp. Please keep it for your records.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>
