@@ -131,7 +131,7 @@ def profile():
         form.first_name.data = first
         form.last_name.data  = last
 
-    return render_template('main/profile.html', form=form, error=error)
+    return render_template('main/profile.html', form=form, error=error, user=user)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

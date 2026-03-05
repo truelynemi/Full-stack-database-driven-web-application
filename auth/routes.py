@@ -15,7 +15,9 @@
 #   GET/POST  /reset-password/<token>
 # ─────────────────────────────────────────────────────────────────────────────
 
-import re  # Regular expressions — used to validate password strength
+import re       # Regular expressions — used to validate password strength
+import secrets  # Cryptographically secure random numbers — used to generate OTP codes
+from datetime import datetime, timedelta  # OTP expiry calculation
 
 from flask import render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -27,7 +29,7 @@ from auth import auth_bp
 from auth.forms import LoginForm, RegistrationForm, ForgotPasswordForm, ResetPasswordForm
 from auth.helpers import (
     verify_token, send_verification_email, send_password_reset_email,
-    set_user_session, redirect_to_dashboard
+    send_otp_email, set_user_session, redirect_to_dashboard, login_required
 )
 
 
@@ -66,10 +68,27 @@ def login():
                     # Account exists and password is correct but email not yet verified
                     error = "Please verify your email before logging in. Check your inbox or resend below."
                 else:
-                    # Everything checks out — log the user in
-                    set_user_session(user, remember=form.remember_me.data)
-                    flash(f"Welcome back, {user.full_name}!", "success")
-                    return redirect_to_dashboard(user.role)
+                    # Everything checks out — check whether 2FA is enabled
+                    if user.is_2fa_enabled:
+                        # Generate a cryptographically random 6-digit code
+                        code = f'{secrets.randbelow(1000000):06d}'
+                        user.otp_code    = code
+                        user.otp_expires = datetime.utcnow() + timedelta(minutes=10)
+                        db.session.commit()
+                        try:
+                            send_otp_email(user.email, code)
+                        except Exception:
+                            pass  # Don't block login if email fails; code still in DB
+                        # Store who's waiting — not a full session yet (not logged in)
+                        session['pending_2fa_user_id'] = user.user_id
+                        session['pending_2fa_remember'] = form.remember_me.data
+                        flash('A 6-digit code has been sent to your email.', 'info')
+                        return redirect(url_for('auth.two_fa_verify'))
+                    else:
+                        # No 2FA — log straight in
+                        set_user_session(user, remember=form.remember_me.data)
+                        flash(f"Welcome back, {user.full_name}!", "success")
+                        return redirect_to_dashboard(user.role)
         else:
             # validate_on_submit() failed — most likely the CSRF token was missing or wrong
             flash('CSRF Token Missing or Invalid!', 'danger')
@@ -318,3 +337,84 @@ def reset_password(token):
             return redirect(url_for('auth.login'))
 
     return render_template('auth/reset_password.html', form=form, error=error, token=token)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2FA VERIFY  —  GET/POST /2fa/verify
+# Step 2 of login when 2FA is enabled.
+# The user enters the 6-digit code that was emailed to them.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@auth_bp.route('/2fa/verify', methods=['GET', 'POST'])
+def two_fa_verify():
+    """Show the OTP entry form and verify the submitted code."""
+    pending_id = session.get('pending_2fa_user_id')
+    if not pending_id:
+        # No pending 2FA — nothing to verify
+        return redirect(url_for('auth.login'))
+
+    if request.method == 'POST':
+        code = request.form.get('code', '').strip()
+        user = User.query.get(pending_id)
+
+        if not user or not user.otp_code:
+            # Session gone stale
+            session.pop('pending_2fa_user_id', None)
+            flash('Session expired. Please log in again.', 'danger')
+            return redirect(url_for('auth.login'))
+
+        if datetime.utcnow() > user.otp_expires:
+            # Code has timed out — clear it and send the user back
+            user.otp_code    = None
+            user.otp_expires = None
+            db.session.commit()
+            session.pop('pending_2fa_user_id', None)
+            flash('That code has expired. Please log in again.', 'danger')
+            return redirect(url_for('auth.login'))
+
+        if code != user.otp_code:
+            flash('Incorrect code. Please try again.', 'danger')
+            return render_template('auth/2fa_verify.html')
+
+        # ── Code is correct — complete the login ──
+        user.otp_code    = None  # Consume the code so it can't be reused
+        user.otp_expires = None
+        db.session.commit()
+
+        remember = session.pop('pending_2fa_remember', False)
+        session.pop('pending_2fa_user_id', None)
+        set_user_session(user, remember=remember)
+        flash(f"Welcome back, {user.full_name}!", "success")
+        return redirect_to_dashboard(user.role)
+
+    return render_template('auth/2fa_verify.html')
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# 2FA TOGGLE  —  POST /2fa/toggle
+# Lets the logged-in user enable or disable 2FA from their profile page.
+# Requires their current password so this can't be done by hijacking a session.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@auth_bp.route('/2fa/toggle', methods=['POST'])
+@login_required
+def two_fa_toggle():
+    """Enable or disable 2FA for the current user. Password confirmation required."""
+    user = User.query.get(session['user_id'])
+    password = request.form.get('password', '')
+
+    if not check_password_hash(user.password_hash, password):
+        flash('Incorrect password. 2FA setting not changed.', 'danger')
+        return redirect(url_for('main.profile'))
+
+    user.is_2fa_enabled = not user.is_2fa_enabled
+
+    # Clear any stale OTP when disabling
+    if not user.is_2fa_enabled:
+        user.otp_code    = None
+        user.otp_expires = None
+
+    db.session.commit()
+    status = 'enabled' if user.is_2fa_enabled else 'disabled'
+    flash(f'Two-factor authentication {status}.', 'success')
+    return redirect(url_for('main.profile'))

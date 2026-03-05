@@ -59,6 +59,17 @@ class User(db.Model):
     # which sets this to True.
     is_verified = db.Column(db.Boolean, nullable=False, default=False)
 
+    # ── Two-factor authentication (email OTP) ───────────────────────────────
+    # Users opt in via their profile page.  When enabled, after a correct
+    # password a 6-digit code is emailed and must be entered to complete login.
+    is_2fa_enabled = db.Column(db.Boolean, nullable=False, default=False)
+
+    # Stores the current pending OTP (6-digit string).  Cleared once used or expired.
+    otp_code    = db.Column(db.String(6), nullable=True)
+
+    # UTC datetime when the OTP expires (set to now + 10 min on generation).
+    otp_expires = db.Column(db.DateTime, nullable=True)
+
     # Relationship to orders — lets us do user.orders to get all their orders
     orders = db.relationship('Order', backref='user', lazy=True)
 

@@ -66,6 +66,21 @@ def send_verification_email(user_email):
     mail.send(msg)
 
 
+def send_otp_email(user_email, code):
+    """
+    Send a 6-digit one-time password to the user for 2FA login verification.
+    The code expires in 10 minutes (enforced server-side via otp_expires).
+    """
+    msg = Message('Your login verification code', recipients=[user_email])
+    msg.body = (
+        f'Your one-time login code is:\n\n'
+        f'    {code}\n\n'
+        f'This code expires in 10 minutes.\n\n'
+        f'If you did not attempt to log in, please change your password immediately.'
+    )
+    mail.send(msg)
+
+
 def send_password_reset_email(user_email):
     """
     Send an email with a link the user can use to set a new password.

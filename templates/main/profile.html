@@ -63,6 +63,33 @@
 
     <p><a href="{{ url_for('main.user_dashboard') }}">Back to dashboard</a></p>
 
+    <!-- ── Two-Factor Authentication ── -->
+    <hr style="margin:40px 0;border-color:#e5e7eb;">
+    <div class="twofa-zone">
+        <h2>Two-Factor Authentication</h2>
+        {% if user.is_2fa_enabled %}
+            <p>2FA is <strong style="color:#065f46;">enabled</strong>. A 6-digit code is emailed to you on every login.</p>
+            <form method="post" action="{{ url_for('auth.two_fa_toggle') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div style="margin:16px 0;">
+                    <label for="twofa_off_pw">Confirm your password to disable</label>
+                    <input type="password" id="twofa_off_pw" name="password" required placeholder="Current password">
+                </div>
+                <button type="submit" class="btn btn-secondary">Disable 2FA</button>
+            </form>
+        {% else %}
+            <p>2FA is <strong style="color:#6b7280;">disabled</strong>. Enable it to require an emailed code on every login.</p>
+            <form method="post" action="{{ url_for('auth.two_fa_toggle') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div style="margin:16px 0;">
+                    <label for="twofa_on_pw">Confirm your password to enable</label>
+                    <input type="password" id="twofa_on_pw" name="password" required placeholder="Current password">
+                </div>
+                <button type="submit" class="btn btn-primary">Enable 2FA</button>
+            </form>
+        {% endif %}
+    </div>
+
     <!-- ── Danger Zone ── -->
     <div class="danger-zone">
         <h2>Delete Account</h2>
