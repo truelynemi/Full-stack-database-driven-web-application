@@ -14,6 +14,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 import os  # Used to read environment variables from the .env file
+from datetime import timedelta  # Used to set the Remember Me session lifetime
 
 from dotenv import load_dotenv  # Loads variables from .env into os.environ
 load_dotenv()                   # Must be called before os.environ.get() reads anything
@@ -43,6 +44,11 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 
 # Disable a SQLAlchemy feature we don't need (saves memory/warnings)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# How long a "Remember Me" session lasts before the cookie expires.
+# Only applies when session.permanent=True (set in auth/helpers.py set_user_session).
+# Without this, Flask defaults to 31 days — setting it explicitly makes it clear.
+app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=30)
 
 # ── Gmail SMTP settings ───────────────────────────────────────────────────
 # Flask-Mail will use these to connect to Gmail and send emails.
