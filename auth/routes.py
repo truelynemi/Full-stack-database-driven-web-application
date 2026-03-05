@@ -70,17 +70,22 @@ def login():
                 else:
                     # Everything checks out — check whether 2FA is enabled
                     if user.is_2fa_enabled:
-                        # Generate a cryptographically random 6-digit code
+                        # secrets.randbelow(1_000_000) gives a cryptographically secure
+                        # random integer in [0, 999999]. Zero-padding with :06d ensures
+                        # the code is always exactly 6 digits (e.g. 000042).
                         code = f'{secrets.randbelow(1000000):06d}'
                         user.otp_code    = code
+                        # Code is valid for 10 minutes — enforced server-side in two_fa_verify
                         user.otp_expires = datetime.utcnow() + timedelta(minutes=10)
                         db.session.commit()
                         try:
                             send_otp_email(user.email, code)
                         except Exception:
                             pass  # Don't block login if email fails; code still in DB
-                        # Store who's waiting — not a full session yet (not logged in)
+                        # Store only who is pending — the user is NOT yet logged in.
+                        # set_user_session() is called in two_fa_verify after the code is verified.
                         session['pending_2fa_user_id'] = user.user_id
+                        # Save the Remember Me preference so two_fa_verify can use it later
                         session['pending_2fa_remember'] = form.remember_me.data
                         flash('A 6-digit code has been sent to your email.', 'info')
                         return redirect(url_for('auth.two_fa_verify'))
@@ -348,9 +353,10 @@ def reset_password(token):
 @auth_bp.route('/2fa/verify', methods=['GET', 'POST'])
 def two_fa_verify():
     """Show the OTP entry form and verify the submitted code."""
+    # Guard: if there's no pending user in the session this page was visited directly —
+    # redirect to login so the flow always starts from the beginning.
     pending_id = session.get('pending_2fa_user_id')
     if not pending_id:
-        # No pending 2FA — nothing to verify
         return redirect(url_for('auth.login'))
 
     if request.method == 'POST':
@@ -358,13 +364,13 @@ def two_fa_verify():
         user = User.query.get(pending_id)
 
         if not user or not user.otp_code:
-            # Session gone stale
+            # Pending session exists but the DB row has no code — stale state
             session.pop('pending_2fa_user_id', None)
             flash('Session expired. Please log in again.', 'danger')
             return redirect(url_for('auth.login'))
 
+        # Check expiry BEFORE comparing the code to prevent timing-based abuse
         if datetime.utcnow() > user.otp_expires:
-            # Code has timed out — clear it and send the user back
             user.otp_code    = None
             user.otp_expires = None
             db.session.commit()
@@ -373,16 +379,20 @@ def two_fa_verify():
             return redirect(url_for('auth.login'))
 
         if code != user.otp_code:
+            # Wrong code — stay on the verification page so the user can retry
             flash('Incorrect code. Please try again.', 'danger')
             return render_template('auth/2fa_verify.html')
 
         # ── Code is correct — complete the login ──
-        user.otp_code    = None  # Consume the code so it can't be reused
+        # Immediately null out the OTP so it cannot be reused even within its window
+        user.otp_code    = None
         user.otp_expires = None
         db.session.commit()
 
+        # Retrieve the Remember Me preference saved during the login step
         remember = session.pop('pending_2fa_remember', False)
         session.pop('pending_2fa_user_id', None)
+        # Only now do we write the full session — the user is officially logged in
         set_user_session(user, remember=remember)
         flash(f"Welcome back, {user.full_name}!", "success")
         return redirect_to_dashboard(user.role)
@@ -403,13 +413,17 @@ def two_fa_toggle():
     user = User.query.get(session['user_id'])
     password = request.form.get('password', '')
 
+    # Require the current password so a hijacked session can't silently
+    # disable 2FA — the attacker would still need to know the password.
     if not check_password_hash(user.password_hash, password):
         flash('Incorrect password. 2FA setting not changed.', 'danger')
         return redirect(url_for('main.profile'))
 
+    # Toggle: True → False, False → True
     user.is_2fa_enabled = not user.is_2fa_enabled
 
-    # Clear any stale OTP when disabling
+    # When disabling, clear any OTP that may have been generated during a login attempt
+    # so there's no stale code sitting in the database
     if not user.is_2fa_enabled:
         user.otp_code    = None
         user.otp_expires = None

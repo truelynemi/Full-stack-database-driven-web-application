@@ -25,6 +25,14 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <label for="code">Verification code</label>
+        <!--
+            inputmode="numeric"          — shows a number pad on mobile devices
+            pattern="[0-9]{6}"           — browser-side: only accept exactly 6 digits
+            maxlength="6"                — prevents typing more than 6 characters
+            autocomplete="one-time-code" — lets the browser/iOS auto-fill the OTP
+                                           from an SMS or email notification
+            autofocus                    — cursor lands here immediately on page load
+        -->
         <input type="text" id="code" name="code"
                inputmode="numeric" pattern="[0-9]{6}"
                maxlength="6" autocomplete="one-time-code"
