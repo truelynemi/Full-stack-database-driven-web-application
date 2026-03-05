@@ -1,18 +1,21 @@
 # seed.py
 # ─────────────────────────────────────────────────────────────────────────────
-# Populates the database with demo data for exam / presentation purposes.
+# Populates the database with the admin and test user accounts.
 #
-# Run once before the demo:
+# Run once after first setup:
 #   python seed.py
 #
 # Safe to run multiple times — existing rows are skipped, nothing is duplicated.
+#
+# Note: products are intentionally not seeded here. Add them through the
+# admin panel (Admin Dashboard → Products → Add Product).
 # ─────────────────────────────────────────────────────────────────────────────
 
 from dotenv import load_dotenv
 load_dotenv()
 
 from app import app
-from models import db, User, Product
+from models import db, User
 from werkzeug.security import generate_password_hash
 
 
@@ -29,49 +32,6 @@ TEST_USER = {
     'password':  'User1234',
     'role':      'user',
 }
-
-PRODUCTS = [
-    {
-        'name':        'Mechanical Keyboard',
-        'description': 'A full-size mechanical keyboard with tactile switches. '
-                       'Perfect for long coding sessions.',
-        'price':       7999,   # £79.99
-        'image_url':   'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=400',
-        'is_active':   True,
-    },
-    {
-        'name':        'Wireless Mouse',
-        'description': 'Ergonomic wireless mouse with a long-lasting battery and '
-                       'precision optical sensor.',
-        'price':       3499,   # £34.99
-        'image_url':   'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=400',
-        'is_active':   True,
-    },
-    {
-        'name':        'USB-C Hub',
-        'description': '7-in-1 USB-C hub with HDMI, USB 3.0 ports, SD card reader, '
-                       'and 100W pass-through charging.',
-        'price':       4999,   # £49.99
-        'image_url':   'https://images.unsplash.com/photo-1625842268584-8f3296236761?w=400',
-        'is_active':   True,
-    },
-    {
-        'name':        'Monitor Stand',
-        'description': 'Adjustable aluminium monitor stand with a built-in storage '
-                       'drawer. Raises your screen to eye level.',
-        'price':       2999,   # £29.99
-        'image_url':   'https://images.unsplash.com/photo-1547082299-de196ea013d6?w=400',
-        'is_active':   True,
-    },
-    {
-        'name':        'Webcam 1080p',
-        'description': 'Full HD webcam with built-in microphone and auto-focus. '
-                       'Plug-and-play, no drivers needed.',
-        'price':       5999,   # £59.99
-        'image_url':   'https://images.unsplash.com/photo-1587826080692-f439cd0b70da?w=400',
-        'is_active':   False,  # Intentionally inactive — demonstrates the admin panel feature
-    },
-]
 
 
 def seed_user(data):
@@ -90,24 +50,12 @@ def seed_user(data):
     print(f"  [ok]   Created {data['role']}: {data['email']} / {data['password']}")
 
 
-def seed_products():
-    if Product.query.count() > 0:
-        print(f"  [skip] Products already exist ({Product.query.count()} rows)")
-        return
-    for p in PRODUCTS:
-        db.session.add(Product(**p))
-        status = 'active' if p['is_active'] else 'inactive'
-        print(f"  [ok]   Created product ({status}): {p['name']} — £{p['price'] / 100:.2f}")
-
-
 def main():
     with app.app_context():
         db.create_all()
         print("\nSeeding users...")
         seed_user(ADMIN)
         seed_user(TEST_USER)
-        print("\nSeeding products...")
-        seed_products()
         db.session.commit()
         print("\nDone. Database is ready.\n")
         print("  Admin login:  admin@admin.com  /  Admin1234")
