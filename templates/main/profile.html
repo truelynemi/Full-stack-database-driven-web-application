@@ -63,6 +63,22 @@
 
     <p><a href="{{ url_for('main.user_dashboard') }}">Back to dashboard</a></p>
 
+    <!-- ── Danger Zone ── -->
+    <div class="danger-zone">
+        <h2>Delete Account</h2>
+        <p>This is <strong>permanent and cannot be undone</strong>. Your profile and all order history will be erased.</p>
+        <form method="post" action="{{ url_for('main.account_delete') }}"
+              onsubmit="return confirm('Delete your account permanently? This cannot be undone.');">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div style="margin: 16px 0;">
+                <label for="delete_password">Confirm your password</label>
+                <input type="password" id="delete_password" name="password"
+                       required placeholder="Enter your current password">
+            </div>
+            <button type="submit" class="btn-danger">Delete My Account</button>
+        </form>
+    </div>
+
 </body>
 
 <script>

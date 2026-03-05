@@ -14,7 +14,7 @@ import re  # Regex — used for password strength validation on the profile page
 from flask import render_template, redirect, url_for, flash, session, request
 from werkzeug.security import generate_password_hash, check_password_hash
 
-from models import db, User, Product
+from models import db, User, Product, Order, OrderItem
 from extensions import limiter
 from auth.helpers import login_required
 from auth.forms import ProfileForm
@@ -132,6 +132,39 @@ def profile():
         form.last_name.data  = last
 
     return render_template('main/profile.html', form=form, error=error)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ACCOUNT DELETION  —  POST /account/delete
+# Permanently removes the logged-in user's account and all their orders.
+# Requires password confirmation so this can't be triggered by a stray link.
+# ─────────────────────────────────────────────────────────────────────────────
+
+@main_bp.route('/account/delete', methods=['POST'])
+@login_required
+def account_delete():
+    """Permanently delete the current user's account and all their data."""
+    user = User.query.get_or_404(session['user_id'])
+    password = request.form.get('password', '')
+
+    # Verify the user knows their own password before we destroy anything
+    if not check_password_hash(user.password_hash, password):
+        flash('Incorrect password. Your account was not deleted.', 'danger')
+        return redirect(url_for('main.profile'))
+
+    # Delete order items first (child FK), then orders (parent FK), then the user.
+    # SQLite doesn't enforce FK cascades by default so we delete manually.
+    for order in user.orders:
+        for item in order.items:
+            db.session.delete(item)
+        db.session.delete(order)
+    db.session.delete(user)
+    db.session.commit()
+
+    # Clear the session so the cookie no longer points to a deleted user
+    session.clear()
+    flash('Your account has been permanently deleted.', 'info')
+    return redirect(url_for('auth.login'))
 
 
 # ─────────────────────────────────────────────────────────────────────────────

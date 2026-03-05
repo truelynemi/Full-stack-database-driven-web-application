@@ -90,6 +90,13 @@ app.register_blueprint(shop_bp)   # Shop routes: /shop, /cart, /checkout/*, /ord
 # message instead of a raw error page.
 # ─────────────────────────────────────────────────────────────────────────────
 
+@app.context_processor
+def inject_consent():
+    """Pass the cookie_consent cookie value to all templates as 'consent'."""
+    consent = request.cookies.get('cookie_consent')
+    return dict(consent=consent)
+
+
 @app.errorhandler(CSRFError)
 def handle_csrf_error(e):
     flash('Your session has expired or the request was invalid. Please try again.', 'danger')
@@ -109,3 +116,4 @@ if __name__ == '__main__':
         # Safe to run every time — it skips tables that already exist.
         db.create_all()
     app.run(debug=True)  # debug=True enables auto-reload and detailed error pages
+    
