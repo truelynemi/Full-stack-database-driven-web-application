@@ -1,49 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Two-Factor Verification</title>
-</head>
-<body>
+{% extends "base_auth.html" %}
+{% block title %}Two-Factor Verification{% endblock %}
 
-    <!-- Flash messages (e.g. wrong code, expired code) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="flash flash-{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% block content %}
+<h1>Check your email</h1>
+<p>We sent a 6-digit code to your email address. Enter it below to complete sign-in.</p>
+<p style="font-size:0.875rem;color:#6b7280;">The code expires in 10 minutes.</p>
 
-    <h1>Check your email</h1>
-    <p>We sent a 6-digit code to your email address. Enter it below to complete sign-in.</p>
-    <p style="font-size:0.875rem;color:#6b7280;">The code expires in 10 minutes.</p>
+<form method="post">
+    <!-- CSRF token — Flask-WTF checks this on every POST -->
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
-    <form method="post">
-        <!-- CSRF token — Flask-WTF checks this on every POST -->
-        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label for="code">Verification code</label>
+    <!--
+        inputmode="numeric"          — shows a number pad on mobile devices
+        pattern="[0-9]{6}"           — browser-side: only accept exactly 6 digits
+        maxlength="6"                — prevents typing more than 6 characters
+        autocomplete="one-time-code" — lets the browser/iOS auto-fill the OTP
+                                       from an SMS or email notification
+        autofocus                    — cursor lands here immediately on page load
+    -->
+    <input type="text" id="code" name="code"
+           inputmode="numeric" pattern="[0-9]{6}"
+           maxlength="6" autocomplete="one-time-code"
+           placeholder="000000" required autofocus>
 
-        <label for="code">Verification code</label>
-        <!--
-            inputmode="numeric"          — shows a number pad on mobile devices
-            pattern="[0-9]{6}"           — browser-side: only accept exactly 6 digits
-            maxlength="6"                — prevents typing more than 6 characters
-            autocomplete="one-time-code" — lets the browser/iOS auto-fill the OTP
-                                           from an SMS or email notification
-            autofocus                    — cursor lands here immediately on page load
-        -->
-        <input type="text" id="code" name="code"
-               inputmode="numeric" pattern="[0-9]{6}"
-               maxlength="6" autocomplete="one-time-code"
-               placeholder="000000" required autofocus>
+    <button type="submit" class="btn btn-primary auth-btn">Verify</button>
+</form>
 
-        <button type="submit" class="btn btn-primary auth-btn">Verify</button>
-    </form>
-
-    <p style="margin-top:16px;">
-        <a href="{{ url_for('auth.login') }}">Back to login</a>
-    </p>
-
-</body>
-</html>
+<p style="margin-top:16px;">
+    <a href="{{ url_for('auth.login') }}">Back to login</a>
+</p>
+{% endblock %}

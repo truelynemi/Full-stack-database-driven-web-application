@@ -1,27 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-</head>
-<body>
+{% extends "base_main.html" %}
+{% block title %}Dashboard{% endblock %}
 
-    <!-- Flash messages (e.g. "Welcome back, John!") -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="flash flash-{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% block content %}
+<h1>Welcome, {{ session['user_name'] }}!</h1>
+<p>You are logged in as <strong>{{ session['user_role'] }}</strong>.</p>
 
-    <h1>Welcome, {{ session['user_name'] }}!</h1>
-    <p>You are logged in as <strong>{{ session['user_role'] }}</strong>.</p>
-
-    <a href="{{ url_for('main.profile') }}">Edit profile</a> |
-    <!-- Log out clears the session and redirects to /login -->
-    <a href="{{ url_for('auth.logout') }}">Log out</a>
-
-</body>
-</html>
+<a href="{{ url_for('main.profile') }}">Edit profile</a>
+{% endblock %}

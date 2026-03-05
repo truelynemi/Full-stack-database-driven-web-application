@@ -1,25 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard</title>
-</head>
-<body>
+{% extends "base_admin.html" %}
+{% block title %}Admin Dashboard{% endblock %}
 
-    <!-- Flash messages -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="flash flash-{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
-
-    <h1>Admin Dashboard</h1>
-    <p>Welcome, {{ session['user_name'] }}. You have admin access.</p>
-
-    <a href="{{ url_for('auth.logout') }}">Log out</a>
-
-</body>
-</html>
+{% block content %}
+<h1>Admin Dashboard</h1>
+<p>Welcome, {{ session['user_name'] }}. You have admin access.</p>
+{% endblock %}

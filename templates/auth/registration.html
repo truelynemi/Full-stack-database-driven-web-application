@@ -1,88 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
-</head>
-<body>
+{% extends "base_auth.html" %}
+{% block title %}Sign Up{% endblock %}
 
-    <!-- Flash messages (e.g. CSRF errors) -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="flash flash-{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% block content %}
+<form id="signupForm" method="post">
+{{ form.hidden_tag() }}
 
-    <form id="signupForm" method="post">
-    {{ form.hidden_tag() }}  <!-- CSRF Token -->
+<!-- Inline server-side error (e.g. email already taken, weak password) -->
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% endif %}
 
-    <!-- Inline server-side error (e.g. email already taken, weak password) -->
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
-
-    <div class="grid-2">
-        <div>
-            <label for="firstName">First name</label>
-            {{ form.first_name() }}
-        </div>
-        <div>
-            <label for="lastName">Last name</label>
-            {{ form.last_name() }}
-        </div>
+<div class="grid-2">
+    <div>
+        <label for="firstName">First name</label>
+        {{ form.first_name() }}
     </div>
-
-    <label for="signupEmail">Email address</label>
-    {{ form.email() }}
-
-    <label for="signupPassword">Password</label>
-    {{ form.password() }}
-
-    <!-- Live password strength indicator — updated on every keystroke -->
-    <div class="strength-bar-wrap" style="background:#e0e0e0;border-radius:4px;height:8px;margin:6px 0 2px;">
-        <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:width 0.3s,background 0.3s;"></div>
+    <div>
+        <label for="lastName">Last name</label>
+        {{ form.last_name() }}
     </div>
-    <p id="strength-label" style="margin:0 0 10px;font-size:0.8rem;color:#888;">Start typing to check strength</p>
+</div>
 
-    <label for="signupConfirmPassword">Confirm password</label>
-    {{ form.confirm_password() }}
+<label for="signupEmail">Email address</label>
+{{ form.email() }}
 
-    <label for="agree_terms">
-        {{ form.agree_terms() }}
-        I agree to the <a href="{{ url_for('main.terms') }}" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>
-    </label>
+<label for="signupPassword">Password</label>
+{{ form.password() }}
 
-    <button type="submit" class="btn btn-primary auth-btn">
-        Sign up
-    </button>
+<!-- Live password strength indicator — updated on every keystroke -->
+<div class="strength-bar-wrap" style="background:#e0e0e0;border-radius:4px;height:8px;margin:6px 0 2px;">
+    <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:width 0.3s,background 0.3s;"></div>
+</div>
+<p id="strength-label" style="margin:0 0 10px;font-size:0.8rem;color:#888;">Start typing to check strength</p>
 
-    <p class="auth-meta">
-        Already have an account?
-        <a href="{{ url_for('auth.login') }}">Log in</a>
-    </p>
+<label for="signupConfirmPassword">Confirm password</label>
+{{ form.confirm_password() }}
+
+<label for="agree_terms">
+    {{ form.agree_terms() }}
+    I agree to the <a href="{{ url_for('main.terms') }}" target="_blank" rel="noopener noreferrer">Terms &amp; Conditions</a>
+</label>
+
+<button type="submit" class="btn btn-primary auth-btn">
+    Sign up
+</button>
+
+<p class="auth-meta">
+    Already have an account?
+    <a href="{{ url_for('auth.login') }}">Log in</a>
+</p>
 </form>
+{% endblock %}
 
-<!-- Client-side password validation — runs before the form is even submitted -->
+{% block scripts %}
 <script>
     // ── Live strength indicator ────────────────────────────────────────────
-    // Runs on every keystroke in the password field and updates the bar + label.
     document.getElementById('password').addEventListener('input', function() {
         const val = this.value;
         let score = 0;
 
-        // Award 1 point for each criterion met
-        if (val.length >= 8)               score++;  // Long enough
-        if (/\d/.test(val))                score++;  // Has a number
-        if (/[A-Z]/.test(val))             score++;  // Has an uppercase letter
-        if (/[^A-Za-z0-9]/.test(val))      score++;  // Has a special character (bonus)
+        if (val.length >= 8)               score++;
+        if (/\d/.test(val))                score++;
+        if (/[A-Z]/.test(val))             score++;
+        if (/[^A-Za-z0-9]/.test(val))      score++;
 
         const bar   = document.getElementById('strength-bar');
         const label = document.getElementById('strength-label');
 
-        // Map score → width, colour, and label text
         const levels = [
             { pct: '0%',   color: '#e0e0e0', text: 'Start typing to check strength', textColor: '#888' },
             { pct: '25%',  color: '#e53935', text: 'Weak',        textColor: '#e53935' },
@@ -100,12 +84,10 @@
 
     // ── Submit-time validation ────────────────────────────────────────────
     document.getElementById('signupForm').addEventListener('submit', function(e) {
-        // Get the values of the two password fields
         let password = document.getElementById('password').value;
         let confirmPassword = document.getElementById('confirm_password').value;
         let passwordError = '';
 
-        // Check password strength (mirrors the server-side rules in auth.py)
         if (password.length < 8) {
             passwordError = 'Password must be at least 8 characters long.';
         } else if (!/\d/.test(password)) {
@@ -114,18 +96,14 @@
             passwordError = 'Password must contain at least one uppercase letter.';
         }
 
-        // Check that the two password fields match
         if (password !== confirmPassword) {
             passwordError = 'Passwords do not match.';
         }
 
-        // If there's an error, stop the form from submitting and alert the user
         if (passwordError) {
-            e.preventDefault();  // Cancel the form submission
+            e.preventDefault();
             alert(passwordError);
         }
     });
 </script>
-
-</body>
-</html>
+{% endblock %}

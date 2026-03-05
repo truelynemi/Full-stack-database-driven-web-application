@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MyApp{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── Toast flash messages — fixed overlay, top-right ── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container" id="flash-container">
+    {% for category, message in messages %}
+    <div class="flash {{ category }}">
+        <span>{{ message }}</span>
+        <button class="flash-close" onclick="this.parentElement.remove()" aria-label="Dismiss">&times;</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+{% block content %}{% endblock %}
+
+<!-- ── Cookie consent banner (hidden once accepted) ── -->
+{% if not consent %}
+<div id="cookie-banner" class="cookie-banner">
+    <span>This website uses cookies to improve your experience.</span>
+    <button id="accept-btn">Accept</button>
+</div>
+{% endif %}
+
+<!-- ── Scripts ── -->
+<script src="{{ url_for('static', filename='js/consent.js') }}"></script>
+
+{% if consent == "accepted" %}
+<script src="{{ url_for('static', filename='js/userway.js') }}"></script>
+{% endif %}
+
+<!-- Auto-dismiss toasts after 5 s with a fade-out -->
+<script>
+(function () {
+    document.querySelectorAll('.flash').forEach(function (t) {
+        setTimeout(function () {
+            t.style.transition = 'opacity 0.4s, transform 0.4s';
+            t.style.opacity = '0';
+            t.style.transform = 'translateX(110%)';
+            setTimeout(function () { t.remove(); }, 400);
+        }, 5000);
+    });
+})();
+</script>
+
+{% block scripts %}{% endblock %}
+
+</body>
+</html>

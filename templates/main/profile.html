@@ -1,113 +1,99 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Profile</title>
-</head>
-<body>
+{% extends "base_main.html" %}
+{% block title %}Edit Profile{% endblock %}
 
-    <!-- Flash messages (e.g. "Profile updated successfully!") -->
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <p class="flash flash-{{ category }}">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-    {% endwith %}
+{% block content %}
+<h1>Edit Profile</h1>
 
-    <h1>Edit Profile</h1>
+<form method="post">
+{{ form.hidden_tag() }}
 
-    <form method="post">
-    {{ form.hidden_tag() }}  <!-- CSRF Token -->
+<!-- Server-side error (e.g. wrong current password) -->
+{% if error %}
+    <p class="error">{{ error }}</p>
+{% endif %}
 
-    <!-- Server-side error (e.g. wrong current password) -->
-    {% if error %}
-        <p class="error">{{ error }}</p>
-    {% endif %}
+<!-- ── Name ─────────────────────────────────────────────────────────── -->
+<h2>Your name</h2>
 
-    <!-- ── Name ─────────────────────────────────────────────────────────── -->
-    <h2>Your name</h2>
-
-    <div class="grid-2">
-        <div>
-            <label for="first_name">First name</label>
-            {{ form.first_name() }}
-        </div>
-        <div>
-            <label for="last_name">Last name</label>
-            {{ form.last_name() }}
-        </div>
+<div class="grid-2">
+    <div>
+        <label for="first_name">First name</label>
+        {{ form.first_name() }}
     </div>
-
-    <!-- ── Change password (optional) ──────────────────────────────────── -->
-    <h2>Change password <small style="font-size:0.75em;font-weight:normal;color:#888;">(leave blank to keep current)</small></h2>
-
-    <label for="current_password">Current password</label>
-    {{ form.current_password() }}
-
-    <label for="new_password">New password</label>
-    {{ form.new_password() }}
-
-    <!-- Live strength bar — same logic as registration page -->
-    <div class="strength-bar-wrap" style="background:#e0e0e0;border-radius:4px;height:8px;margin:6px 0 2px;">
-        <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:width 0.3s,background 0.3s;"></div>
+    <div>
+        <label for="last_name">Last name</label>
+        {{ form.last_name() }}
     </div>
-    <p id="strength-label" style="margin:0 0 10px;font-size:0.8rem;color:#888;"></p>
+</div>
 
-    <label for="confirm_new_password">Confirm new password</label>
-    {{ form.confirm_new_password() }}
+<!-- ── Change password (optional) ──────────────────────────────────── -->
+<h2>Change password <small style="font-size:0.75em;font-weight:normal;color:#888;">(leave blank to keep current)</small></h2>
 
-    <button type="submit" class="btn btn-primary">Save Changes</button>
-    </form>
+<label for="current_password">Current password</label>
+{{ form.current_password() }}
 
-    <p><a href="{{ url_for('main.user_dashboard') }}">Back to dashboard</a></p>
+<label for="new_password">New password</label>
+{{ form.new_password() }}
 
-    <!-- ── Two-Factor Authentication ── -->
-    <hr style="margin:40px 0;border-color:#e5e7eb;">
-    <div class="twofa-zone">
-        <h2>Two-Factor Authentication</h2>
-        {% if user.is_2fa_enabled %}
-            <p>2FA is <strong style="color:#065f46;">enabled</strong>. A 6-digit code is emailed to you on every login.</p>
-            <form method="post" action="{{ url_for('auth.two_fa_toggle') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div style="margin:16px 0;">
-                    <label for="twofa_off_pw">Confirm your password to disable</label>
-                    <input type="password" id="twofa_off_pw" name="password" required placeholder="Current password">
-                </div>
-                <button type="submit" class="btn btn-secondary">Disable 2FA</button>
-            </form>
-        {% else %}
-            <p>2FA is <strong style="color:#6b7280;">disabled</strong>. Enable it to require an emailed code on every login.</p>
-            <form method="post" action="{{ url_for('auth.two_fa_toggle') }}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-                <div style="margin:16px 0;">
-                    <label for="twofa_on_pw">Confirm your password to enable</label>
-                    <input type="password" id="twofa_on_pw" name="password" required placeholder="Current password">
-                </div>
-                <button type="submit" class="btn btn-primary">Enable 2FA</button>
-            </form>
-        {% endif %}
-    </div>
+<!-- Live strength bar — same logic as registration page -->
+<div class="strength-bar-wrap" style="background:#e0e0e0;border-radius:4px;height:8px;margin:6px 0 2px;">
+    <div id="strength-bar" style="height:100%;width:0%;border-radius:4px;transition:width 0.3s,background 0.3s;"></div>
+</div>
+<p id="strength-label" style="margin:0 0 10px;font-size:0.8rem;color:#888;"></p>
 
-    <!-- ── Danger Zone ── -->
-    <div class="danger-zone">
-        <h2>Delete Account</h2>
-        <p>This is <strong>permanent and cannot be undone</strong>. Your profile and all order history will be erased.</p>
-        <form method="post" action="{{ url_for('main.account_delete') }}"
-              onsubmit="return confirm('Delete your account permanently? This cannot be undone.');">
+<label for="confirm_new_password">Confirm new password</label>
+{{ form.confirm_new_password() }}
+
+<button type="submit" class="btn btn-primary">Save Changes</button>
+</form>
+
+<p><a href="{{ url_for('main.user_dashboard') }}">Back to dashboard</a></p>
+
+<!-- ── Two-Factor Authentication ── -->
+<hr style="margin:40px 0;border-color:#e5e7eb;">
+<div class="twofa-zone">
+    <h2>Two-Factor Authentication</h2>
+    {% if user.is_2fa_enabled %}
+        <p>2FA is <strong style="color:#065f46;">enabled</strong>. A 6-digit code is emailed to you on every login.</p>
+        <form method="post" action="{{ url_for('auth.two_fa_toggle') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-            <div style="margin: 16px 0;">
-                <label for="delete_password">Confirm your password</label>
-                <input type="password" id="delete_password" name="password"
-                       required placeholder="Enter your current password">
+            <div style="margin:16px 0;">
+                <label for="twofa_off_pw">Confirm your password to disable</label>
+                <input type="password" id="twofa_off_pw" name="password" required placeholder="Current password">
             </div>
-            <button type="submit" class="btn-danger">Delete My Account</button>
+            <button type="submit" class="btn btn-secondary">Disable 2FA</button>
         </form>
-    </div>
+    {% else %}
+        <p>2FA is <strong style="color:#6b7280;">disabled</strong>. Enable it to require an emailed code on every login.</p>
+        <form method="post" action="{{ url_for('auth.two_fa_toggle') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <div style="margin:16px 0;">
+                <label for="twofa_on_pw">Confirm your password to enable</label>
+                <input type="password" id="twofa_on_pw" name="password" required placeholder="Current password">
+            </div>
+            <button type="submit" class="btn btn-primary">Enable 2FA</button>
+        </form>
+    {% endif %}
+</div>
 
-</body>
+<!-- ── Danger Zone ── -->
+<div class="danger-zone">
+    <h2>Delete Account</h2>
+    <p>This is <strong>permanent and cannot be undone</strong>. Your profile and all order history will be erased.</p>
+    <form method="post" action="{{ url_for('main.account_delete') }}"
+          onsubmit="return confirm('Delete your account permanently? This cannot be undone.');">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <div style="margin: 16px 0;">
+            <label for="delete_password">Confirm your password</label>
+            <input type="password" id="delete_password" name="password"
+                   required placeholder="Enter your current password">
+        </div>
+        <button type="submit" class="btn-danger">Delete My Account</button>
+    </form>
+</div>
+{% endblock %}
 
+{% block scripts %}
 <script>
     // Live password strength indicator on the new_password field
     document.getElementById('new_password').addEventListener('input', function() {
@@ -137,5 +123,4 @@
         label.style.color    = level.textColor;
     });
 </script>
-
-</html>
+{% endblock %}
