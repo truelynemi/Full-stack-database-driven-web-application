@@ -65,6 +65,20 @@ body {
     background-color: #991b1b;
 }
 
+/* Profile page — gray scheme */
+.profile-page .navbar {
+    background-color: #4b5563;
+}
+.profile-page {
+    background-color: #f3f4f6;
+}
+.profile-page .btn-primary {
+    background-color: #4b5563;
+}
+.profile-page .btn-primary:hover {
+    background-color: #374151;
+}
+
 /* Dashboard navbar — green to distinguish from the shop navy */
 .dashboard-page .navbar {
     background-color: #15803d;
