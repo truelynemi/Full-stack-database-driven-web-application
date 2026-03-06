@@ -18,22 +18,32 @@ body {
     background-color: #f9fafb;
 }
 
+.site-body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.site-main {
+    flex: 1;
+}
+
 /* ========================================
    NAVBAR
    ======================================== */
 
 /* Dark navy bar pinned to the top; flexbox keeps brand left, links right */
 .navbar {
-    background-color: #1e3a5f;
+    background-color: #f0f7e6;
     padding: 14px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
-/* Site name/logo link — white, bold, no underline */
+/* Site name/logo link — dark, bold, no underline */
 .navbar-brand {
-    color: white;
+    color: #111111;
     font-weight: 700;
     font-size: 1.125rem;
     text-decoration: none;
@@ -47,17 +57,31 @@ body {
     list-style: none;
 }
 
-/* Individual nav link — muted white with smooth colour transition */
+/* Individual nav link — dark text with smooth colour transition */
 .navbar-links a {
-    color: #cbd5e1;
+    color: #1a1a1a;
     text-decoration: none;
     font-size: 0.9375rem;
     transition: color 0.2s;
 }
 
-/* Brighten to pure white when hovered */
+/* Darken on hover */
 .navbar-links a:hover {
-    color: white;
+    color: #000000;
+}
+
+/* Sign Up pill button */
+.navbar-signup {
+    background-color: #111111;
+    color: #ffffff !important;
+    padding: 7px 18px;
+    border-radius: 9999px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+.navbar-signup:hover {
+    background-color: #333333 !important;
+    color: #ffffff !important;
 }
 
 /* Admin navbar — dark red background to make admin area visually distinct */
@@ -1259,3 +1283,122 @@ textarea:focus {
 .form-row .form-group { flex: 1; min-width: 140px; }
 .form-hint { color: #9ca3af; font-size: 0.8rem; display: block; margin-top: 4px; }
 .required { color: #ef4444; }
+
+/* ── Footer ───────────────────────────────────────────────────────────────── */
+.site-footer {
+    background-color: #0d1b2e;
+    color: #ffffff;
+    margin-top: auto;
+}
+.footer-inner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 4rem;
+}
+.footer-separator {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    margin: 0;
+}
+.footer-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 3rem 0;
+    gap: 2rem;
+}
+.brand-title-link { text-decoration: none; }
+.brand-title {
+    font-size: 2.25rem;
+    font-weight: 800;
+    line-height: 1.1;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    margin: 0;
+}
+.footer-contact {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+.contact-address {
+    font-style: normal;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+.contact-line {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+}
+.contact-line .icon {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    flex-shrink: 0;
+}
+.contact-link {
+    color: #e2e8f0;
+    text-decoration: none;
+}
+.contact-link:hover { color: #ffffff; }
+.social-block {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 1.25rem;
+}
+.social-label {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+.social-links {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+.social-link {
+    color: #ffffff;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+.social-link:hover { color: #94a3b8; }
+.footer-legal {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.25rem 0;
+}
+.legal-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    gap: 2rem;
+}
+.legal-link {
+    color: #94a3b8;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+}
+.legal-link:hover { color: #ffffff; }
+.copyright { color: #94a3b8; font-size: 0.85rem; }
+.sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+}

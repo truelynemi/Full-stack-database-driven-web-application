@@ -5,14 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MyApp{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/shop.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     {% block head %}{% endblock %}
 </head>
-<body class="{% block body_class %}{% endblock %}">
+<body class="{% block body_class %}{% endblock %} site-body">
 
 <!-- ── Navigation ── -->
 <nav class="navbar">
     <a href="{{ url_for('main.home') }}" class="navbar-brand">MyApp</a>
     <ul class="navbar-links">
+        <li><a href="{{ url_for('main.placeholder') }}">Placeholder</a></li>
+        <li><a href="{{ url_for('shop.catalogue') }}">Products</a></li>
         {% if session.get('user_id') %}
             {% if session.get('user_role') == 'admin' %}
             <li><a href="{{ url_for('admin.admin_dashboard') }}" style="color:#D44646;font-weight:600;">⚙ Admin Panel</a></li>
@@ -22,7 +25,7 @@
             <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
         {% else %}
             <li><a href="{{ url_for('auth.login') }}">Log in</a></li>
-            <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+            <li><a href="{{ url_for('auth.register') }}" class="navbar-signup">Sign Up</a></li>
         {% endif %}
     </ul>
 </nav>
@@ -41,7 +44,70 @@
 {% endif %}
 {% endwith %}
 
+<main class="site-main">
 {% block content %}{% endblock %}
+</main>
+
+<footer class="site-footer" role="contentinfo" aria-labelledby="footer-heading">
+    <div class="footer-inner">
+        <div class="footer-separator" aria-hidden="true"></div>
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <a href="{{ url_for('main.home') }}" class="brand-title-link">
+                    <h2 id="footer-heading" class="brand-title">COMPANY<br>NAME</h2>
+                </a>
+            </div>
+            <div class="footer-contact" aria-label="Contact information and social media">
+                <address class="contact-address">
+                    <p class="contact-line">
+                        <span class="icon" aria-hidden="true"><i class="fa-solid fa-location-dot"></i></span>
+                        <span>345 Faulconer Drive, Suite 4 &bull; Charlottesville, CA, 12345</span>
+                    </p>
+                    <p class="contact-line">
+                        <span class="icon" aria-hidden="true"><i class="fa-solid fa-phone"></i></span>
+                        <a href="tel:+11234567890" class="contact-link">(123) 456‑7890</a>
+                    </p>
+                </address>
+                <div class="social-block">
+                    <p class="social-label">Social Media</p>
+                    <nav class="social-links" aria-label="Social media links">
+                        <a class="social-link" href="#" onclick="return false;" aria-label="Facebook">
+                            <i class="fa-brands fa-facebook" aria-hidden="true"></i>
+                            <span class="sr-only">Facebook</span>
+                        </a>
+                        <a class="social-link" href="#" onclick="return false;" aria-label="Twitter">
+                            <i class="fa-brands fa-x-twitter" aria-hidden="true"></i>
+                            <span class="sr-only">Twitter</span>
+                        </a>
+                        <a class="social-link" href="#" onclick="return false;" aria-label="LinkedIn">
+                            <i class="fa-brands fa-linkedin" aria-hidden="true"></i>
+                            <span class="sr-only">LinkedIn</span>
+                        </a>
+                        <a class="social-link" href="#" onclick="return false;" aria-label="YouTube">
+                            <i class="fa-brands fa-youtube" aria-hidden="true"></i>
+                            <span class="sr-only">YouTube</span>
+                        </a>
+                        <a class="social-link" href="#" onclick="return false;" aria-label="Instagram">
+                            <i class="fa-brands fa-instagram" aria-hidden="true"></i>
+                            <span class="sr-only">Instagram</span>
+                        </a>
+                    </nav>
+                </div>
+            </div>
+        </div>
+        <div class="footer-separator" aria-hidden="true"></div>
+        <div class="footer-legal" role="navigation" aria-label="Footer navigation">
+            <ul class="legal-list">
+                <li><a href="{{ url_for('main.home') }}#about" class="legal-link">ABOUT US</a></li>
+                <li><a href="{{ url_for('main.terms') }}" class="legal-link">TERMS</a></li>
+                <li><a href="{{ url_for('main.privacy') }}" class="legal-link">PRIVACY POLICY</a></li>
+            </ul>
+            <div class="copyright">
+                <small>Copyright &copy; 2026 &bull; Rolsa Technologies Inc.</small>
+            </div>
+        </div>
+    </div>
+</footer>
 
 <!-- Auto-dismiss toasts after 5 s with a fade-out -->
 <script>

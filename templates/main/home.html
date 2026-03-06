@@ -52,11 +52,20 @@
     </div>
 </section>
 
-<!-- ── Footer strip ── -->
-<footer style="text-align:center;padding:2rem;color:#9ca3af;font-size:0.85rem;border-top:1px solid #e5e7eb;">
-    &copy; {{ now.year if now is defined else 2026 }} MyApp &mdash;
-    <a href="{{ url_for('main.privacy') }}" style="color:#9ca3af;">Privacy</a> &middot;
-    <a href="{{ url_for('main.terms') }}" style="color:#9ca3af;">Terms</a>
-</footer>
+<!-- ── About Us ── -->
+<section id="about" style="background:#0d1b2e;color:#fff;padding:5rem 2rem;">
+    <div style="max-width:960px;margin:0 auto;">
+        <h2 style="font-size:2rem;font-weight:800;text-transform:uppercase;letter-spacing:0.03em;margin-bottom:1.5rem;">About Us</h2>
+        <p style="color:#cbd5e1;font-size:1rem;line-height:1.8;max-width:680px;">
+            We are a forward-thinking company dedicated to delivering seamless digital experiences.
+            From our online shop to our booking platform, everything we build is designed with
+            simplicity, reliability, and our customers in mind.
+        </p>
+        <p style="color:#cbd5e1;font-size:1rem;line-height:1.8;max-width:680px;margin-top:1rem;">
+            Our team is passionate about technology and committed to continuous improvement.
+            Whether you're here to browse products or schedule a service, we're glad you're with us.
+        </p>
+    </div>
+</section>
 
 {% endblock %}

@@ -1,7 +1,6 @@
 # main/routes.py
 # ─────────────────────────────────────────────────────────────────────────────
 # Route handlers for all non-authentication pages:
-#   GET       /about
 #   GET       /user_dashboard
 #   GET       /admin_dashboard
 #   GET/POST  /profile
@@ -33,15 +32,11 @@ def home():
     return render_template('main/home.html')
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# ABOUT PAGE  —  GET /about
-# ─────────────────────────────────────────────────────────────────────────────
-
-@main_bp.route('/about')
-@limiter.exempt  # This page is public info — no need to rate-limit it
-def about():
-    """Public about page — no login required."""
-    return render_template('main/about.html')
+@main_bp.route('/placeholder')
+@limiter.exempt
+def placeholder():
+    """Generic placeholder page for features coming soon."""
+    return render_template('main/placeholder.html')
 
 
 @main_bp.route('/privacy')
