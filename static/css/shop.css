@@ -60,6 +60,39 @@ body {
     color: white;
 }
 
+/* Admin navbar — dark red background to make admin area visually distinct */
+.navbar-admin {
+    background-color: #991b1b;
+}
+
+/* ── Admin theme overrides — scoped to admin-page body class ── */
+
+/* Primary action buttons (Add, Save, etc.) use the admin red */
+.admin-page .btn-primary {
+    background-color: #AD0034;
+}
+.admin-page .btn-primary:hover {
+    background-color: #8a0029;
+}
+
+/* Page header banner gradient uses admin red */
+.admin-page .page-header {
+    background: linear-gradient(135deg, #7f1d1d 0%, #AD0034 100%);
+}
+
+/* Admin card header gets a red left accent border */
+.admin-page .admin-card-header {
+    border-left: 4px solid #AD0034;
+}
+
+/* Back links and inline text links in admin */
+.admin-page .back-link {
+    color: #AD0034;
+}
+.admin-page .back-link:hover {
+    color: #8a0029;
+}
+
 /* Cart button — stands out with a blue pill background and flex layout
    for the icon, text, and badge to sit inline */
 .cart-link {

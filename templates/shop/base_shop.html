@@ -46,22 +46,6 @@
 
 {% block content %}{% endblock %}
 
-<!-- ── Cookie consent banner (hidden once accepted) ── -->
-{% if not consent %}
-<div id="cookie-banner" class="cookie-banner">
-    <span>This website uses cookies to improve your experience.</span>
-    <button id="accept-btn">Accept</button>
-</div>
-{% endif %}
-
-<!-- ── Scripts ── -->
-<script src="{{ url_for('static', filename='js/consent.js') }}"></script>
-
-{% if consent == "accepted" %}
-<!-- Accessibility / tracking scripts — only loaded after consent -->
-<script src="{{ url_for('static', filename='js/userway.js') }}"></script>
-{% endif %}
-
 <!-- Auto-dismiss toasts after 5 s with a fade-out -->
 <script>
 (function () {
@@ -75,6 +59,20 @@
     });
 })();
 </script>
+
+<!-- ── Accessibility widget ── -->
+<script src="{{ url_for('static', filename='js/userway.js') }}"></script>
+
+<!-- GDPR Consent Banner -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/gdpr-banner.css') }}" />
+<script
+  type="module"
+  src="https://cdn.jsdelivr.net/npm/@beyonk/gdpr-cookie-consent-banner/dist/index.js"
+></script>
+<cookie-consent-banner cookie-name="foo" description="This site uses cookies to improve your browsing experience, perform analytics and research, and conduct advertising.
+    To change your preferences, click Manage preferences.
+    Otherwise, clicking Accept all cookies indicates you agree to our use of cookies on your device."></cookie-consent-banner>
+{% block scripts %}{% endblock %}
 
 </body>
 </html>
