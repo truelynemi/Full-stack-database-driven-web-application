@@ -65,6 +65,11 @@ body {
     background-color: #991b1b;
 }
 
+/* Dashboard navbar — green to distinguish from the shop navy */
+.dashboard-page .navbar {
+    background-color: #15803d;
+}
+
 /* ── Admin theme overrides — scoped to admin-page body class ── */
 
 /* Primary action buttons (Add, Save, etc.) use the admin red */
