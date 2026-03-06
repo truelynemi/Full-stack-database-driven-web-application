@@ -3,8 +3,50 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h1>Welcome, {{ session['user_name'] }}!</h1>
-<p>You are logged in as <strong>{{ session['user_role'] }}</strong>.</p>
+<h1 style="padding:2rem 2rem 0;">Welcome, {{ session['user_name'] }}!</h1>
+<p style="padding:0.25rem 2rem 0;color:#6b7280;">What would you like to do today?</p>
 
-<a href="{{ url_for('main.profile') }}">Edit profile</a>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1.25rem;margin:2rem;">
+
+    <a href="{{ url_for('shop.catalogue') }}" style="text-decoration:none;">
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;background:#fff;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:1.75rem;margin-bottom:0.5rem;">🛍️</div>
+            <h2 style="margin:0 0 0.25rem;font-size:1rem;">Shop</h2>
+            <p style="margin:0;font-size:0.85rem;color:#6b7280;">Browse and buy products</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('shop.orders') }}" style="text-decoration:none;">
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;background:#fff;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:1.75rem;margin-bottom:0.5rem;">📦</div>
+            <h2 style="margin:0 0 0.25rem;font-size:1rem;">My Orders</h2>
+            <p style="margin:0;font-size:0.85rem;color:#6b7280;">View your order history</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('bookings.search') }}" style="text-decoration:none;">
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;background:#fff;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:1.75rem;margin-bottom:0.5rem;">🗓️</div>
+            <h2 style="margin:0 0 0.25rem;font-size:1rem;">Bookings</h2>
+            <p style="margin:0;font-size:0.85rem;color:#6b7280;">Search and book available services</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('bookings.my_bookings') }}" style="text-decoration:none;">
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;background:#fff;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:1.75rem;margin-bottom:0.5rem;">📋</div>
+            <h2 style="margin:0 0 0.25rem;font-size:1rem;">My Bookings</h2>
+            <p style="margin:0;font-size:0.85rem;color:#6b7280;">View your upcoming bookings</p>
+        </div>
+    </a>
+
+    <a href="{{ url_for('main.profile') }}" style="text-decoration:none;">
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.5rem;background:#fff;transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='none'">
+            <div style="font-size:1.75rem;margin-bottom:0.5rem;">👤</div>
+            <h2 style="margin:0 0 0.25rem;font-size:1rem;">Profile</h2>
+            <p style="margin:0;font-size:0.85rem;color:#6b7280;">Edit your account details</p>
+        </div>
+    </a>
+
+</div>
 {% endblock %}
