@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Terms of Service</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/terms.css') }}">
-</head>
-<body>
+{% extends "main/base_main.html" %}
+{% block title %}Terms of Service{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/terms.css') }}">
+{% endblock %}
+
+{% block content %}
 <div class="page-container">
 
     <!-- Hero Section -->
@@ -15,7 +13,6 @@
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <div class="hero-icon-wrapper">
-                <!-- Document icon -->
                 <svg class="hero-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
@@ -84,7 +81,6 @@
                 <div class="content-container">
                     <div class="content-card">
 
-                        <!-- Intro paragraph (before numbered sections) -->
                         <div class="section-content" style="margin-bottom: 32px;">
                             <p>
                                 Welcome to [YOUR COMPANY NAME]. By accessing or using our website at [yourwebsite.com]
@@ -151,10 +147,7 @@
                                 <h2>3. Account Registration</h2>
                             </div>
                             <div class="section-content">
-                                <p>
-                                    To place an order or access certain features, you may be required to create an account.
-                                    You agree to:
-                                </p>
+                                <p>To place an order or access certain features, you may be required to create an account. You agree to:</p>
                                 <ul>
                                     <li>Provide accurate, current, and complete information during registration.</li>
                                     <li>Keep your password confidential and not share it with third parties.</li>
@@ -264,7 +257,6 @@
                                     Our returns and refund policy is outlined below and is subject to your statutory rights
                                     under the Consumer Rights Act 2015 and the Consumer Contracts Regulations 2013.
                                 </p>
-
                                 <h3>7.1 Physical Products</h3>
                                 <p>
                                     You have the right to cancel your order within 14 days of receiving your goods
@@ -272,24 +264,19 @@
                                     14-day period expires. Products must be returned in their original condition. Return
                                     postage costs are your responsibility unless the product is faulty or incorrectly sent.
                                 </p>
-
                                 <h3>7.2 Services</h3>
                                 <p>
                                     For services, the right to cancel applies for 14 days from the date of purchase, provided
                                     the service has not yet commenced. If you request the service begins within the
                                     cancellation period, you may be charged a proportionate amount for the service provided.
                                 </p>
-
                                 <h3>7.3 Faulty or Incorrect Items</h3>
                                 <p>
                                     If you receive a faulty or incorrect item, contact us within 30 days of delivery. We will
                                     offer a repair, replacement, or full refund as appropriate.
                                 </p>
-
                                 <h3>7.4 Refund Processing</h3>
-                                <p>
-                                    Approved refunds will be processed within 14 days to the original payment method.
-                                </p>
+                                <p>Approved refunds will be processed within 14 days to the original payment method.</p>
                             </div>
                         </section>
 
@@ -495,9 +482,10 @@
     </button>
 
 </div><!-- /.page-container -->
+{% endblock %}
 
+{% block scripts %}
 <script>
-    // ── Scroll to top button ──────────────────────────────────────────────────
     const scrollTopBtn = document.getElementById('scrollTopBtn');
 
     window.addEventListener('scroll', function () {
@@ -508,7 +496,6 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ── Active section highlight via IntersectionObserver ────────────────────
     const sidebarLinks = document.querySelectorAll('.sidebar-nav-list a');
     const sections = document.querySelectorAll('.section[id]');
 
@@ -525,6 +512,4 @@
 
     sections.forEach(function (s) { observer.observe(s); });
 </script>
-
-</body>
-</html>
+{% endblock %}

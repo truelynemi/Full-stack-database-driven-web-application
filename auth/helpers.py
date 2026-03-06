@@ -136,5 +136,5 @@ def set_user_session(user, remember=False):
 def redirect_to_dashboard(role):
     """Send admin users to the admin dashboard, everyone else to user dashboard."""
     if role == 'admin':
-        return redirect(url_for('main.admin_dashboard'))
+        return redirect(url_for('admin.admin_dashboard'))
     return redirect(url_for('main.user_dashboard'))

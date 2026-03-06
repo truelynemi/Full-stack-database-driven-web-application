@@ -1,0 +1,62 @@
+{% extends "main/base_main.html" %}
+{% block title %}Home — MyApp{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ── -->
+<section style="background:#1e3a5f;color:#fff;padding:5rem 2rem;text-align:center;">
+    <h1 style="font-size:2.5rem;font-weight:700;margin-bottom:1rem;">Welcome to MyApp</h1>
+    <p style="font-size:1.125rem;color:#cbd5e1;max-width:540px;margin:0 auto 2rem;">
+        Shop products, book services, and manage your account — all in one place.
+    </p>
+    {% if session.get('user_id') %}
+        <a href="{{ url_for('admin.admin_dashboard' if session.get('user_role') == 'admin' else 'main.user_dashboard') }}"
+           style="display:inline-block;background:#fff;color:#1e3a5f;font-weight:700;padding:0.75rem 2rem;border-radius:6px;text-decoration:none;font-size:1rem;">
+            Go to Dashboard
+        </a>
+    {% else %}
+        <a href="{{ url_for('auth.register') }}"
+           style="display:inline-block;background:#fff;color:#1e3a5f;font-weight:700;padding:0.75rem 2rem;border-radius:6px;text-decoration:none;font-size:1rem;margin-right:0.75rem;">
+            Get Started
+        </a>
+        <a href="{{ url_for('auth.login') }}"
+           style="display:inline-block;background:transparent;color:#fff;font-weight:600;padding:0.75rem 2rem;border-radius:6px;text-decoration:none;font-size:1rem;border:2px solid rgba(255,255,255,0.5);">
+            Log In
+        </a>
+    {% endif %}
+</section>
+
+<!-- ── Features ── -->
+<section style="max-width:960px;margin:4rem auto;padding:0 2rem;">
+    <h2 style="text-align:center;font-size:1.5rem;margin-bottom:2rem;color:#1e3a5f;">What you can do</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1.5rem;">
+
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.75rem;background:#fff;">
+            <div style="font-size:2rem;margin-bottom:0.75rem;">🛍️</div>
+            <h3 style="font-size:1.05rem;margin-bottom:0.4rem;">Shop</h3>
+            <p style="color:#6b7280;font-size:0.9rem;">Browse our product catalogue and check out securely with Stripe.</p>
+        </div>
+
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.75rem;background:#fff;">
+            <div style="font-size:2rem;margin-bottom:0.75rem;">🗓️</div>
+            <h3 style="font-size:1.05rem;margin-bottom:0.4rem;">Bookings</h3>
+            <p style="color:#6b7280;font-size:0.9rem;">Search available services and reserve a time slot that suits you.</p>
+        </div>
+
+        <div style="border:1px solid #e5e7eb;border-radius:8px;padding:1.75rem;background:#fff;">
+            <div style="font-size:2rem;margin-bottom:0.75rem;">👤</div>
+            <h3 style="font-size:1.05rem;margin-bottom:0.4rem;">Your Account</h3>
+            <p style="color:#6b7280;font-size:0.9rem;">Manage your profile, view order history, and keep your bookings on track.</p>
+        </div>
+
+    </div>
+</section>
+
+<!-- ── Footer strip ── -->
+<footer style="text-align:center;padding:2rem;color:#9ca3af;font-size:0.85rem;border-top:1px solid #e5e7eb;">
+    &copy; {{ now.year if now is defined else 2026 }} MyApp &mdash;
+    <a href="{{ url_for('main.privacy') }}" style="color:#9ca3af;">Privacy</a> &middot;
+    <a href="{{ url_for('main.terms') }}" style="color:#9ca3af;">Terms</a>
+</footer>
+
+{% endblock %}

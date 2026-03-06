@@ -9,7 +9,7 @@
 </div>
 
 <div class="container">
-    <a href="{{ url_for('main.admin_products') }}" class="back-link">← Back to Products</a>
+    <a href="{{ url_for('admin.admin_products') }}" class="back-link">← Back to Products</a>
 
     <div class="form-card">
         {% if error %}
@@ -66,7 +66,7 @@
                 <button type="submit" class="btn btn-primary btn-lg">
                     {{ 'Save Changes' if action == 'edit' else 'Create Product' }}
                 </button>
-                <a href="{{ url_for('main.admin_products') }}" class="btn btn-secondary btn-lg">Cancel</a>
+                <a href="{{ url_for('admin.admin_products') }}" class="btn btn-secondary btn-lg">Cancel</a>
             </div>
         </form>
     </div>

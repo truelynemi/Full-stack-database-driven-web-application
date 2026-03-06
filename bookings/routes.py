@@ -1,45 +1,27 @@
 # bookings/routes.py
 # ─────────────────────────────────────────────────────────────────────────────
-# Generic booking system — users search available slots and reserve them.
-# Admin creates bookable services and time slots via the admin panel.
+# User-facing booking routes.
 #
-# User-facing routes:
-#   GET  /bookings                            — search / browse services
-#   GET  /bookings/<service_id>               — service detail + slot list
-#   POST /bookings/<slot_id>/book             — create a booking
-#   GET  /bookings/my                         — user's own bookings
-#   POST /bookings/<booking_id>/cancel        — cancel a booking
-#
-# Admin routes (login_required + admin role):
-#   GET       /admin/services                         — list all services
-#   GET/POST  /admin/services/new                     — create a service
-#   GET/POST  /admin/services/<id>/edit               — edit a service
-#   POST      /admin/services/<id>/delete             — delete service
-#   GET/POST  /admin/services/<id>/slots/new          — add a time slot
-#   POST      /admin/slots/<id>/delete                — delete a slot
-#   GET       /admin/bookings                         — view all bookings
+#   GET  /bookings                      — search / browse services
+#   GET  /bookings/<service_id>         — service detail + slot list
+#   POST /bookings/<slot_id>/book       — create a booking
+#   GET  /bookings/confirm/<booking_id> — booking confirmation
+#   GET  /bookings/my                   — user's own bookings
+#   POST /bookings/<booking_id>/cancel  — cancel a booking
 # ─────────────────────────────────────────────────────────────────────────────
 
 from datetime import date as date_type, datetime
 
 from flask import render_template, redirect, url_for, flash, session, request
 
-from models import db, BookableService, TimeSlot, Booking, User
+from models import db, BookableService, TimeSlot, Booking
 from auth.helpers import login_required
 from bookings import bookings_bp
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# HELPERS
+# HELPER
 # ─────────────────────────────────────────────────────────────────────────────
-
-def _admin_only():
-    """Return a redirect if the current user is not an admin, else None."""
-    if session.get('user_role') != 'admin':
-        flash('You do not have permission to access that page.', 'danger')
-        return redirect(url_for('main.user_dashboard'))
-    return None
-
 
 def _confirmed_count(slot_id):
     """Count confirmed (non-cancelled) bookings for a given slot."""
@@ -239,220 +221,3 @@ def cancel(booking_id):
     db.session.commit()
     flash('Your booking has been cancelled.', 'info')
     return redirect(url_for('bookings.my_bookings'))
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADMIN — LIST SERVICES  —  GET /admin/services
-# ─────────────────────────────────────────────────────────────────────────────
-
-@bookings_bp.route('/admin/services')
-@login_required
-def admin_services():
-    """List all bookable services (active and inactive) for admin management."""
-    guard = _admin_only()
-    if guard:
-        return guard
-    services = BookableService.query.order_by(BookableService.created_at.desc()).all()
-    return render_template('admin/services.html', services=services)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADMIN — CREATE SERVICE  —  GET/POST /admin/services/new
-# ─────────────────────────────────────────────────────────────────────────────
-
-@bookings_bp.route('/admin/services/new', methods=['GET', 'POST'])
-@login_required
-def admin_service_new():
-    """Form to create a new bookable service."""
-    guard = _admin_only()
-    if guard:
-        return guard
-
-    error = None
-    if request.method == 'POST':
-        name        = request.form.get('name', '').strip()
-        description = request.form.get('description', '').strip() or None
-        is_active   = request.form.get('is_active') == 'on'
-
-        if not name:
-            error = 'Service name is required.'
-        else:
-            service = BookableService(name=name, description=description, is_active=is_active)
-            db.session.add(service)
-            db.session.commit()
-            flash(f'Service "{name}" created.', 'success')
-            return redirect(url_for('bookings.admin_services'))
-
-    return render_template('admin/service_form.html', service=None, error=error, action='new')
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADMIN — EDIT SERVICE  —  GET/POST /admin/services/<id>/edit
-# ─────────────────────────────────────────────────────────────────────────────
-
-@bookings_bp.route('/admin/services/<int:service_id>/edit', methods=['GET', 'POST'])
-@login_required
-def admin_service_edit(service_id):
-    """Form to edit an existing bookable service."""
-    guard = _admin_only()
-    if guard:
-        return guard
-
-    service = BookableService.query.get_or_404(service_id)
-    error = None
-
-    if request.method == 'POST':
-        name        = request.form.get('name', '').strip()
-        description = request.form.get('description', '').strip() or None
-        is_active   = request.form.get('is_active') == 'on'
-
-        if not name:
-            error = 'Service name is required.'
-        else:
-            service.name        = name
-            service.description = description
-            service.is_active   = is_active
-            db.session.commit()
-            flash(f'Service "{name}" updated.', 'success')
-            return redirect(url_for('bookings.admin_services'))
-
-    return render_template('admin/service_form.html', service=service, error=error, action='edit')
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADMIN — DELETE SERVICE  —  POST /admin/services/<id>/delete
-# ─────────────────────────────────────────────────────────────────────────────
-
-@bookings_bp.route('/admin/services/<int:service_id>/delete', methods=['POST'])
-@login_required
-def admin_service_delete(service_id):
-    """Delete a bookable service. Blocked if the service has any time slots."""
-    guard = _admin_only()
-    if guard:
-        return guard
-
-    service = BookableService.query.get_or_404(service_id)
-
-    # Guard: deleting a service with slots would leave orphaned slot/booking rows
-    if service.slots:
-        flash(
-            f'Cannot delete "{service.name}" — it has existing time slots. '
-            'Delete all slots first, or deactivate the service instead.',
-            'danger'
-        )
-        return redirect(url_for('bookings.admin_services'))
-
-    name = service.name
-    db.session.delete(service)
-    db.session.commit()
-    flash(f'Service "{name}" deleted.', 'info')
-    return redirect(url_for('bookings.admin_services'))
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADMIN — ADD TIME SLOT  —  GET/POST /admin/services/<id>/slots/new
-# ─────────────────────────────────────────────────────────────────────────────
-
-@bookings_bp.route('/admin/services/<int:service_id>/slots/new', methods=['GET', 'POST'])
-@login_required
-def admin_slot_new(service_id):
-    """Add a time slot to a bookable service."""
-    guard = _admin_only()
-    if guard:
-        return guard
-
-    service = BookableService.query.get_or_404(service_id)
-    error = None
-
-    if request.method == 'POST':
-        date_str     = request.form.get('date', '').strip()
-        start_str    = request.form.get('start_time', '').strip()
-        end_str      = request.form.get('end_time', '').strip()
-        capacity_str = request.form.get('capacity', '1').strip()
-
-        # Validate all fields
-        if not date_str or not start_str or not end_str:
-            error = 'Date, start time, and end time are required.'
-        else:
-            try:
-                slot_date  = datetime.strptime(date_str, '%Y-%m-%d').date()
-                start_time = datetime.strptime(start_str, '%H:%M').time()
-                end_time   = datetime.strptime(end_str, '%H:%M').time()
-            except ValueError:
-                error = 'Invalid date or time format.'
-
-            if not error and end_time <= start_time:
-                error = 'End time must be after start time.'
-
-            try:
-                capacity = int(capacity_str)
-                if capacity < 1:
-                    raise ValueError
-            except ValueError:
-                error = 'Capacity must be a whole number of at least 1.'
-
-        if not error:
-            slot = TimeSlot(
-                service_id=service_id,
-                date=slot_date,
-                start_time=start_time,
-                end_time=end_time,
-                capacity=capacity,
-            )
-            db.session.add(slot)
-            db.session.commit()
-            flash(f'Slot added for {slot_date.strftime("%d %b %Y")} at {start_str}.', 'success')
-            return redirect(url_for('bookings.admin_services'))
-
-    return render_template('admin/slot_form.html', service=service, error=error)
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADMIN — DELETE SLOT  —  POST /admin/slots/<id>/delete
-# ─────────────────────────────────────────────────────────────────────────────
-
-@bookings_bp.route('/admin/slots/<int:slot_id>/delete', methods=['POST'])
-@login_required
-def admin_slot_delete(slot_id):
-    """Delete a time slot. Blocked if any confirmed bookings exist for it."""
-    guard = _admin_only()
-    if guard:
-        return guard
-
-    slot = TimeSlot.query.get_or_404(slot_id)
-    service_id = slot.service_id
-
-    # Guard: don't allow deletion if confirmed bookings reference this slot
-    confirmed = _confirmed_count(slot_id)
-    if confirmed > 0:
-        flash(
-            f'Cannot delete that slot — it has {confirmed} confirmed booking(s). '
-            'Cancel those bookings first.',
-            'danger'
-        )
-        return redirect(url_for('bookings.admin_services'))
-
-    db.session.delete(slot)
-    db.session.commit()
-    flash('Time slot deleted.', 'info')
-    return redirect(url_for('bookings.admin_services'))
-
-
-# ─────────────────────────────────────────────────────────────────────────────
-# ADMIN — ALL BOOKINGS  —  GET /admin/bookings
-# ─────────────────────────────────────────────────────────────────────────────
-
-@bookings_bp.route('/admin/bookings')
-@login_required
-def admin_all_bookings():
-    """Read-only view of every booking across all services."""
-    guard = _admin_only()
-    if guard:
-        return guard
-
-    bookings = (
-        Booking.query
-        .order_by(Booking.created_at.desc())
-        .all()
-    )
-    return render_template('admin/all_bookings.html', bookings=bookings)

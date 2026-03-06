@@ -5,7 +5,7 @@
 {% block content %}
 <div class="page-container form-page">
 
-  <a href="{{ url_for('bookings.admin_services') }}" class="back-link">&larr; Back to services</a>
+  <a href="{{ url_for('admin.admin_services') }}" class="back-link">&larr; Back to services</a>
   <h1 class="page-title">Add Time Slot</h1>
   <p class="subtitle">Service: <strong>{{ service.name }}</strong></p>
 
@@ -40,7 +40,7 @@
 
     <div class="form-actions">
       <button type="submit" class="btn btn-primary">Add Slot</button>
-      <a href="{{ url_for('bookings.admin_services') }}" class="btn btn-secondary">Cancel</a>
+      <a href="{{ url_for('admin.admin_services') }}" class="btn btn-secondary">Cancel</a>
     </div>
   </form>
 

@@ -11,10 +11,10 @@
 
 <!-- ── Navigation ── -->
 <nav class="navbar">
-    <a href="{{ url_for('main.admin_dashboard' if session.get('user_role') == 'admin' else 'main.user_dashboard') }}" class="navbar-brand">MyApp</a>
+    <a href="{{ url_for('admin.admin_dashboard' if session.get('user_role') == 'admin' else 'main.user_dashboard') }}" class="navbar-brand">MyApp</a>
     <ul class="navbar-links">
         {% if session.get('user_role') == 'admin' %}
-        <li><a href="{{ url_for('main.admin_dashboard') }}">Dashboard</a></li>
+        <li><a href="{{ url_for('admin.admin_dashboard') }}">Dashboard</a></li>
         {% else %}
         <li><a href="{{ url_for('main.user_dashboard') }}">Dashboard</a></li>
         {% endif %}
@@ -31,7 +31,7 @@
             </a>
         </li>
         {% if session.get('user_role') == 'admin' %}
-        <li><a href="{{ url_for('main.admin_dashboard') }}" style="color:#D44646;font-weight:600;">⚙ Admin Panel</a></li>
+        <li><a href="{{ url_for('admin.admin_dashboard') }}" style="color:#D44646;font-weight:600;">⚙ Admin Panel</a></li>
         {% endif %}
         <li><a href="{{ url_for('auth.logout') }}">Log out</a></li>
     </ul>

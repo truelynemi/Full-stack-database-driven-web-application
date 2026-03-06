@@ -1,13 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Privacy Policy</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/privacy.css') }}">
-</head>
-<body>
+{% extends "main/base_main.html" %}
+{% block title %}Privacy Policy{% endblock %}
 
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/privacy.css') }}">
+{% endblock %}
+
+{% block content %}
 <div class="page-container">
 
     <!-- Hero Section -->
@@ -15,7 +13,6 @@
         <div class="hero-overlay"></div>
         <div class="hero-content">
             <div class="hero-icon-wrapper">
-                <!-- Shield icon -->
                 <svg class="hero-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
@@ -266,9 +263,10 @@
     </button>
 
 </div><!-- /.page-container -->
+{% endblock %}
 
+{% block scripts %}
 <script>
-    // ── Scroll to top button ──────────────────────────────────────────────────
     const scrollTopBtn = document.getElementById('scrollTopBtn');
 
     window.addEventListener('scroll', function () {
@@ -283,7 +281,6 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // ── Active section highlight via IntersectionObserver ────────────────────
     const sidebarLinks = document.querySelectorAll('.sidebar-nav-list a');
     const sections = document.querySelectorAll('.section[id]');
 
@@ -296,15 +293,8 @@
                 });
             }
         });
-    }, {
-        rootMargin: '-20% 0px -70% 0px',
-        threshold: 0
-    });
+    }, { rootMargin: '-20% 0px -70% 0px', threshold: 0 });
 
-    sections.forEach(function (section) {
-        observer.observe(section);
-    });
+    sections.forEach(function (section) { observer.observe(section); });
 </script>
-
-</body>
-</html>
+{% endblock %}

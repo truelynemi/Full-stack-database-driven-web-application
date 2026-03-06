@@ -7,7 +7,7 @@
 
   <div class="page-header">
     <h1 class="page-title">Bookable Services</h1>
-    <a href="{{ url_for('bookings.admin_service_new') }}" class="btn btn-primary">+ New Service</a>
+    <a href="{{ url_for('admin.admin_service_new') }}" class="btn btn-primary">+ New Service</a>
   </div>
 
   {% if services %}
@@ -26,10 +26,10 @@
             {% endif %}
           </div>
           <div class="service-admin-actions">
-            <a href="{{ url_for('bookings.admin_service_edit', service_id=service.id) }}"
+            <a href="{{ url_for('admin.admin_service_edit', service_id=service.id) }}"
                class="btn btn-secondary btn-sm">Edit</a>
             <form method="post"
-                  action="{{ url_for('bookings.admin_service_delete', service_id=service.id) }}"
+                  action="{{ url_for('admin.admin_service_delete', service_id=service.id) }}"
                   onsubmit="return confirm('Delete service {{ service.name | e }}?')"
                   style="display:inline;">
               <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -64,7 +64,7 @@
                     <td>{{ confirmed }} / {{ slot.capacity }}</td>
                     <td>
                       <form method="post"
-                            action="{{ url_for('bookings.admin_slot_delete', slot_id=slot.id) }}"
+                            action="{{ url_for('admin.admin_slot_delete', slot_id=slot.id) }}"
                             onsubmit="return confirm('Delete this slot?')"
                             style="display:inline;">
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
@@ -78,14 +78,14 @@
           {% else %}
             <p class="empty-state-small">No slots yet.</p>
           {% endif %}
-          <a href="{{ url_for('bookings.admin_slot_new', service_id=service.id) }}"
+          <a href="{{ url_for('admin.admin_slot_new', service_id=service.id) }}"
              class="btn btn-secondary btn-sm" style="margin-top:8px;">+ Add Slot</a>
         </div>
 
       </div>
     {% endfor %}
   {% else %}
-    <p class="empty-state">No services yet. <a href="{{ url_for('bookings.admin_service_new') }}">Create one</a>.</p>
+    <p class="empty-state">No services yet. <a href="{{ url_for('admin.admin_service_new') }}">Create one</a>.</p>
   {% endif %}
 
 </div>

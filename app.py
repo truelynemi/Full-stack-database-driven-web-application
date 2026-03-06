@@ -27,7 +27,8 @@ from extensions import csrf, limiter, mail  # Extension objects from extensions.
 from auth import auth_bp          # Authentication Blueprint (login, register, etc.)
 from main import main_bp          # Main Blueprint (dashboards, profile, about)
 from shop import shop_bp          # Shop Blueprint (catalogue, cart, checkout, orders)
-from bookings import bookings_bp  # Bookings Blueprint (services, slots, reservations)
+from bookings import bookings_bp  # Bookings Blueprint (user-facing: search, book, my bookings)
+from admin import admin_bp        # Admin Blueprint (products, services, slots, all bookings)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -87,9 +88,10 @@ mail.init_app(app)     # Connect Flask-Mail using the Gmail config above
 # ─────────────────────────────────────────────────────────────────────────────
 
 app.register_blueprint(auth_bp)      # Auth routes: /login, /register, /logout, etc.
-app.register_blueprint(main_bp)      # Main routes: /user_dashboard, /admin_dashboard, /profile, /about
+app.register_blueprint(main_bp)      # Main routes: /, /user_dashboard, /admin_dashboard, /profile, /about
 app.register_blueprint(shop_bp)      # Shop routes: /shop, /cart, /checkout/*, /orders
-app.register_blueprint(bookings_bp)  # Booking routes: /bookings, /admin/services, /admin/bookings
+app.register_blueprint(bookings_bp)  # Booking routes: /bookings/*, user-facing only
+app.register_blueprint(admin_bp)     # Admin routes: /admin/products, /admin/services, /admin/bookings
 
 
 # ─────────────────────────────────────────────────────────────────────────────
